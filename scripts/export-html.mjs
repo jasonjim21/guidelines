@@ -1,5 +1,7 @@
-// 원본 재현 17장을 HTML 한 파일로 뽑는다 — 서체·그림까지 다 품어서 인터넷 없이 열린다.
-// 사용: npm run build && node scripts/export-html.mjs [출력 경로]
+// 장표를 HTML 한 파일로 뽑는다 — 서체·그림까지 다 품어서 인터넷 없이 열린다.
+// 사용: npm run build && node scripts/export-html.mjs [deck|original] [출력 경로]
+//   deck     — 전체 장표 (원본 17장 + 목차 응용 시스템 5항목 + 응용 시스템 내지 5장), 기본값
+//   original — 원본 재현 17장만
 // 그림(로고 패스·사진)이 들어가므로 출력은 저장소에 넣지 않는다 (export/ 는 gitignore).
 import http from 'node:http'
 import fs from 'node:fs'
@@ -9,7 +11,9 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require('playwright')
-const out = path.resolve(process.argv[2] ?? 'export/samwoo-ci-v1.html')
+const route = process.argv[2] === 'original' ? 'original' : 'deck'
+const out = path.resolve(process.argv[3] ?? (route === 'deck' ? 'export/samwoo-ci-v1-full.html' : 'export/samwoo-ci-v1.html'))
+const TITLE = route === 'deck' ? '삼우건기 CI 가이드라인 v1 — 전체 장표' : '삼우건기 CI 가이드라인 v1 — 원본 재현'
 fs.mkdirSync(path.dirname(out), { recursive: true })
 
 /* 서체: Pretendard는 번들 파일, Inter·Barlow Condensed는 Google Fonts의 라틴 구간만 받아 품는다 */
@@ -42,7 +46,7 @@ const server = http.createServer((q, r) => {
 const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1' } : undefined
 const browser = await chromium.launch({ proxy })
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true })
-await page.goto(`http://127.0.0.1:${server.address().port}/index.html#original`)
+await page.goto(`http://127.0.0.1:${server.address().port}/index.html#${route}`)
 await page.waitForTimeout(3000)
 const svgs = await page.locator('.gle-original svg').evaluateAll((els) => els.map((e) => e.outerHTML))
 await browser.close()
@@ -53,7 +57,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>삼우건기 CI 가이드라인 v1 — 원본 재현 ${svgs.length}장</title>
+<title>${TITLE} ${svgs.length}장</title>
 <style>
 ${faces.join('\n')}
 html,body{margin:0;background:#e9e9e6}

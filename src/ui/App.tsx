@@ -65,7 +65,10 @@ const readHash = (): Tab => {
   } catch { return 'cover' }
 }
 
-const isOriginal = (() => { try { return location.hash === '#original' } catch { return false } })()
+const route = (() => { try { return location.hash } catch { return '' } })()
+const isOriginal = route === '#original'
+/** #deck — 전체 장표: 원본 17장에 목차(응용 시스템 5항목)와 응용 시스템 내지 5장을 넣은 문서 순서 */
+const isDeck = route === '#deck'
 
 export default function App() {
   const [, setReady] = useState(0)
@@ -84,6 +87,22 @@ export default function App() {
   }
   const num = (i: number) => String(i).padStart(2, '0')
   // #original — 원본 재현 17장만 (원본 자간 그대로). scripts/export-html.mjs가 이 화면을 HTML 한 파일로 뽑는다
+  if (isDeck) {
+    const fonts = FONT_SETS[0]
+    const pages = [
+      DOC.pages[0],
+      renderPage(TOC_DECLS.base, CONTENT, DOC, fonts, 2),
+      ...DOC.pages.slice(2),
+      ...APP_ITEMS.map((it, i) => renderPage(appDecl(it, { ...CONTENT, ...appContent(it, CONTENT.folio) }), { ...CONTENT, ...appContent(it, CONTENT.folio) }, DOC, fonts, 18 + i)),
+    ]
+    return (
+      <div className="gle">
+        <main className="gle-original">
+          {pages.map((p, i) => <PageSvg key={i} page={{ ...p, page: i + 1 }} assets={ASSETS} fonts={fonts} track={0} />)}
+        </main>
+      </div>
+    )
+  }
   if (isOriginal) {
     return (
       <div className="gle">
