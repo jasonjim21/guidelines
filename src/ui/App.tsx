@@ -4,6 +4,8 @@ import type { Assets, Doc } from '../core/doc'
 import { FONT_SETS } from '../core/fonts'
 import { PageSvg } from '../core/render'
 import { renderPage, type Content, type PageDecl } from '../core/blocks'
+import type { DocPage } from '../core/doc'
+import { renderSpecial, specialLayouts } from '../core/specials'
 import { BASE, COVERS, coverContent } from '../core/cover'
 import { tocContent, tocDecls, tocText } from '../core/toc'
 import { DIVIDER_BASE, dividerDecls, dividerDevelop } from '../core/divider'
@@ -26,7 +28,7 @@ const TOC_DECLS = tocDecls(TOC)
 const FACES = [800, 700, 600, 500, 400, 300].map((w) => `${w} 40px "Pretendard Variable"`)
   .concat([400, 500, 600].map((w) => `${w} 40px "Inter"`), ['600 40px "Barlow Condensed"'])
 
-function Section({ title, sub, decls, content = CONTENT }: { title: string; sub: string; decls: { d: PageDecl; label: string }[]; content?: Content }) {
+function Section({ title, sub, decls, content = CONTENT }: { title: string; sub: string; decls: { d: PageDecl; label: string; page?: DocPage }[]; content?: Content }) {
   const fonts = FONT_SETS[0]
   return (
     <section className="gle-section">
@@ -35,9 +37,9 @@ function Section({ title, sub, decls, content = CONTENT }: { title: string; sub:
         <p>{sub}</p>
       </header>
       <div className="gle-grid">
-        {decls.map(({ d, label }, i) => (
+        {decls.map(({ d, label, page }, i) => (
           <figure key={d.id} className="gle-page">
-            <PageSvg page={renderPage(d, content, DOC, fonts, i)} assets={ASSETS} fonts={fonts} />
+            <PageSvg page={page ?? renderPage(d, content, DOC, fonts, i)} assets={ASSETS} fonts={fonts} />
             <figcaption>
               <span className="gle-num">{label}</span>
               <strong>{d.name}</strong>
@@ -144,6 +146,25 @@ export default function App() {
         })}
         {tab === 'content' && PAGE_CONTENT.map((p) => {
           const decls = contentDecls(p.content, DOC, p.asset, p.page)
+          // 색상 체계·색상 규정·회색도는 쪽 전용 레이아웃 4개 (specials.ts)
+          const special = specialLayouts(DOC, p.page)
+          if (special.length) {
+            return (
+              <Section
+                key={p.page}
+                title={`내지 · ${p.content.pkr[0]} (원본 ${p.page}쪽) — 전용 레이아웃`}
+                sub="원본에서 구성 요소(색·값·바탕×버전·농도 단계·로고)를 읽어 이 쪽만의 배치로 다시 짬 · 값과 이름은 원본 글 그대로"
+                content={p.content}
+                decls={[
+                  { d: decls.base, label: '기준' },
+                  ...special.map((sp, i) => {
+                    const r = renderSpecial(sp, p.content, DOC, FONT_SETS[0], 100 + p.page * 10 + i)
+                    return { d: r.decl, label: String(i + 1).padStart(2, '0'), page: r.page }
+                  }),
+                ]}
+              />
+            )
+          }
           return (
             <Section
               key={p.page}

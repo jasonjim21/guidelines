@@ -37,7 +37,7 @@ export const title = (c: Content, tone: 'blue' | 'light' = 'blue', gap = 36): It
   ],
 })
 export const body = (lead = 1.5, tone: 'ink' | 'light' = 'ink', wrap?: number): Item => ({ k: 'text', part: 'body', size: 16, font: 'Pretendard-Regular', tone, lead, wrap })
-const folio = (tone: 'mute' | 'light' = 'mute'): Item => ({ k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone, opacity: tone === 'light' ? 0.6 : undefined })
+export const folio = (tone: 'mute' | 'light' = 'mute'): Item => ({ k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone, opacity: tone === 'light' ? 0.6 : undefined })
 export const folioAt = (x: number, align: Block['align'], tone: 'mute' | 'light' = 'mute'): Block => ({ x, y: 8, align, valign: 'bottom', items: [folio(tone)] })
 
 export function contentDecls(c: Content, doc: Doc, asset: LogoAsset | null, page: number): { base: PageDecl; variants: PageDecl[] } {
