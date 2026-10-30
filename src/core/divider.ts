@@ -150,3 +150,153 @@ export const dividerDecls = (c: Content): PageDecl[] => [
     ],
   },
 ]
+
+/**
+ * 디벨롭 — 04(1/3 색면 + A.), 08(반 나눔), 09(머리표 한 줄), 10(아래 색 띠)을 두 갈래씩 더 민다.
+ * label은 '04-1'처럼 원래 번호를 따른다.
+ */
+export const dividerDevelop = (c: Content): { d: PageDecl; label: string }[] => [
+  {
+    label: '04-1',
+    d: {
+      id: 'd04a', name: '1/3 색면 · A. 위로', note: '04에서 A.를 색면 위쪽으로 올리고, 영문 장 제목은 흰 면 아래로 내려 바닥선에 맞춤. 국문은 영문 위에',
+      bg: 'white',
+      fields: [{ x0: 'edge', x1: 4, y0: 'edge', y1: 'edge', tone: 'blue' }],
+      blocks: [
+        { x: 0, y: 0, align: 'left', valign: 'top', items: [
+          { k: 'text', part: 'ab0', size: 300, font: 'Prohibition-Regular', tone: 'light' },
+        ] },
+        { x: 4.5, y: 8, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'kr0', size: 40, font: 'esamanruOTFMedium', tone: 'blue', gap: 36 },
+          { k: 'text', part: 'en0', size: 200, font: 'Prohibition-Regular', tone: 'black', lead: 0.88 },
+        ] },
+      ],
+    },
+  },
+  {
+    label: '04-2',
+    d: {
+      id: 'd04b', name: '1/3 옅은 면', note: '04의 파랑 면을 옅은 면(주조색 5%)으로 바꾸고 A.를 주조색으로. 영문 장 제목은 흰 면 위쪽 그대로, 로고는 오른쪽 아래',
+      bg: 'white',
+      fields: [{ x0: 'edge', x1: 4, y0: 'edge', y1: 'edge', tone: 'tint' }],
+      blocks: [
+        { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'ab0', size: 300, font: 'Prohibition-Regular', tone: 'blue' },
+        ] },
+        { x: 4.5, y: 0, align: 'left', valign: 'top', items: [
+          { k: 'text', part: 'en0', size: 160, font: 'Prohibition-Regular', tone: 'black', lead: 0.9, gap: 36 },
+          { k: 'text', part: 'kr0', size: 40, font: 'esamanruOTFMedium', tone: 'blue' },
+        ] },
+        { x: 12, y: 8, align: 'right', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 44, mode: 'color' }] },
+      ],
+    },
+  },
+  {
+    label: '08-1',
+    d: {
+      id: 'd08a', name: '반 나눔 · 뒤집기', note: '08을 좌우로 뒤집어 왼쪽 흰 면에 영문 장 제목(검정), 오른쪽 파랑 면에 심볼을 흰색 10%로 크게',
+      bg: 'white',
+      fields: [{ x0: 6, x1: 'edge', y0: 'edge', y1: 'edge', tone: 'blue' }],
+      blocks: [
+        { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'en0', size: 220, font: 'Prohibition-Regular', tone: 'black', lead: 0.88 },
+        ] },
+        { x: 6.4, y: 8.6, align: 'left', valign: 'bottom', items: [
+          { k: 'logo', asset: 'symbol', h: 700, mode: 'mono', tone: 'white', opacity: 0.1 },
+        ] },
+        { x: 0, y: 0, align: 'left', valign: 'top', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      ],
+    },
+  },
+  {
+    label: '08-2',
+    d: {
+      id: 'd08b', name: '위아래 반 나눔', note: '08의 나눔을 가로로. 위 반은 파랑 면에 영문 장 제목을 아래로 붙이고, 아래 흰 면 위쪽에 국문 장 제목',
+      bg: 'white',
+      fields: [{ x0: 'edge', x1: 'edge', y0: 'edge', y1: 4, tone: 'blue' }],
+      blocks: [
+        { x: 0, y: 3.55, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'enl0', size: 220, font: 'Prohibition-Regular', tone: 'light' },
+        ] },
+        { x: 0, y: 4.45, align: 'left', valign: 'top', items: [
+          { k: 'text', part: 'kr0', size: 48, font: 'esamanruOTFMedium', tone: 'black' },
+        ] },
+        { x: 12, y: 8, align: 'right', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      ],
+    },
+  },
+  {
+    label: '09-1',
+    d: {
+      id: 'd09a', name: '머리표 한 줄 · 파랑', note: '09를 파랑 바탕으로. 머리표와 영문 장 제목을 한 줄로 키우고 국문은 그 아래, 로고는 오른쪽 아래',
+      bg: 'blue',
+      blocks: [
+        { x: 0, y: 0, align: 'left', valign: 'top', items: [
+          { k: 'row', gap: 24, cells: [
+            { s: c.ab0[0], dx: 0, size: 96, font: 'Prohibition-Regular', tone: 'light', opacity: 0.4 },
+            { s: c.enl0[0], dx: 24, flow: true, size: 96, font: 'Prohibition-Regular', tone: 'light' },
+          ] },
+          { k: 'text', part: 'kr0', size: 32, font: 'esamanruOTFMedium', tone: 'light', opacity: 0.7 },
+        ] },
+        { x: 12, y: 8, align: 'right', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 44, mode: 'mono', tone: 'light' }] },
+      ],
+    },
+  },
+  {
+    label: '09-2',
+    d: {
+      id: 'd09b', name: '머리표 한 줄 · 가운데 괘선', note: '09의 한 줄을 세로 가운데로 내리고 그 아래 쪽 폭 괘선(50%). 원본 목차의 회색 바탕',
+      bg: 'gray',
+      blocks: [
+        { x: 0, y: 4, align: 'left', valign: 'bottom', items: [
+          { k: 'row', cells: [
+            { s: c.ab0[0], dx: 0, size: 64, font: 'Prohibition-Regular', tone: 'blue' },
+            { s: c.enl0[0], dx: 18, flow: true, size: 64, font: 'Prohibition-Regular', tone: 'black' },
+          ] },
+        ] },
+        { x: 0, y: 4.2, align: 'left', valign: 'top', items: [
+          { k: 'rule', len: 12, tone: 'black', w: 1, opacity: 0.5, gap: 28 },
+          { k: 'text', part: 'kr0', size: 28, font: 'esamanruOTFMedium', tone: 'black' },
+        ] },
+        { x: 0, y: 0, align: 'left', valign: 'top', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      ],
+    },
+  },
+  {
+    label: '10-1',
+    d: {
+      id: 'd10a', name: '위 색 띠', note: '10의 띠를 위로 올림. 위 3/8 파랑 띠 안 아래쪽에 영문 장 제목, 흰 면 왼쪽 아래에 국문 장 제목',
+      bg: 'white',
+      fields: [{ x0: 'edge', x1: 'edge', y0: 'edge', y1: 3, tone: 'blue' }],
+      blocks: [
+        { x: 0, y: 2.6, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'enl0', size: 200, font: 'Prohibition-Regular', tone: 'light' },
+        ] },
+        { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'kr0', size: 48, font: 'esamanruOTFMedium', tone: 'blue' },
+        ] },
+        { x: 12, y: 8, align: 'right', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      ],
+    },
+  },
+  {
+    label: '10-2',
+    d: {
+      id: 'd10b', name: '아래 반 띠 + A.', note: '10의 띠를 아래 반으로 키우고 영문 장 제목을 두 줄로. 띠 오른쪽에 A.를 톤온톤(흰색 30%)으로',
+      bg: 'white',
+      fields: [{ x0: 'edge', x1: 'edge', y0: 4, y1: 'edge', tone: 'blue' }],
+      blocks: [
+        { x: 0, y: 0, align: 'left', valign: 'top', items: [
+          { k: 'text', part: 'kr0', size: 48, font: 'esamanruOTFMedium', tone: 'blue' },
+        ] },
+        { x: 12, y: 0, align: 'right', valign: 'top', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+        { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
+          { k: 'text', part: 'en0', size: 180, font: 'Prohibition-Regular', tone: 'light', lead: 0.88 },
+        ] },
+        { x: 12, y: 8, align: 'right', valign: 'bottom', items: [
+          { k: 'text', part: 'ab0', size: 380, font: 'Prohibition-Regular', tone: 'light', opacity: 0.3 },
+        ] },
+      ],
+    },
+  },
+]

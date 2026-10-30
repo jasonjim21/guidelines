@@ -63,7 +63,7 @@ export type Item =
   /** 빈 간격 */
   | { k: 'space'; h: number; gap?: number }
   /**
-   * 원본에서 빌린 로고. 크기는 높이(h) 또는 단 수(cols)로.
+   * 원본에서 빌린 로고. 크기는 높이(h) 또는 단 수(cols)로. 둘 다 주면 그 상자 안에 맞춘다.
    * mode: color = 원본 2색(파랑+검정), reverse = 검정 부분만 흰색(어두운 바탕), mono = 한 색
    */
   | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; opacity?: number; gap?: number }
@@ -113,7 +113,7 @@ interface LogoPart { el: Extract<El, { t: 'path' | 'rect' }>; blue: boolean }
 interface LogoSrc { box: [number, number, number, number]; parts: LogoPart[] }
 
 const logoCache = new Map<string, LogoSrc>()
-function logoSrc(doc: Doc, a: LogoAsset): LogoSrc {
+export function logoSrc(doc: Doc, a: LogoAsset): LogoSrc {
   const hit = logoCache.get(a)
   if (hit) return hit
   const page = doc.pages[LOGO_PAGE[a] - 1]
@@ -131,9 +131,11 @@ function logoSrc(doc: Doc, a: LogoAsset): LogoSrc {
 
 function logoSize(doc: Doc, it: Extract<Item, { k: 'logo' }>): { w: number; h: number } {
   const [, , bw, bh] = logoSrc(doc, it.asset).box
-  if (it.cols) { const w = ((R - L) / 12) * it.cols; return { w, h: (w * bh) / bw } }
-  const h = it.h ?? 55
-  return { w: (h * bw) / bh, h }
+  // 단 수와 높이를 둘 다 주면 그 상자 안에 들어가는 크기 — 비율이 다른 로고(가로형·세로형)를 같은 선언으로
+  const byW = it.cols ? ((R - L) / 12) * it.cols : Infinity
+  const byH = it.h ?? (it.cols ? Infinity : 55)
+  const k = Math.min(byW / bw, byH / bh)
+  return { w: bw * k, h: bh * k }
 }
 
 function lines(part: string, c: Content): string[] {

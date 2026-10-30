@@ -6,8 +6,8 @@ import { PageSvg } from '../core/render'
 import { renderPage, type Content, type PageDecl } from '../core/blocks'
 import { BASE, COVERS, coverContent } from '../core/cover'
 import { tocContent, tocDecls, tocText } from '../core/toc'
-import { DIVIDER_BASE, dividerDecls } from '../core/divider'
-import { contentDecls, contentPageText } from '../core/content'
+import { DIVIDER_BASE, dividerDecls, dividerDevelop } from '../core/divider'
+import { CONTENT_PAGES, contentDecls, contentPageText } from '../core/content'
 
 const DOC = raw as unknown as Doc
 
@@ -17,14 +17,15 @@ const ASSETS: Assets = (Object.values(local)[0] as Assets | undefined) ?? {}
 
 const TOC = tocContent(DOC)
 const CONTENT: Content = { ...coverContent(DOC), ...tocText(TOC), ...contentPageText(DOC, 4) }
+/** 내지는 쪽마다 제목·설명이 다르다 */
+const PAGE_CONTENT = CONTENT_PAGES.map((p) => ({ ...p, content: { ...CONTENT, ...contentPageText(DOC, p.page) } }))
 const TOC_DECLS = tocDecls(TOC)
-const CONTENT_DECLS = contentDecls(CONTENT)
 
 /** 정렬을 획 끝으로 맞추려면 실제 서체로 재야 한다 — 서체를 받은 뒤 한 번 더 그린다 */
 const FACES = [800, 700, 600, 500, 400, 300].map((w) => `${w} 40px "Pretendard Variable"`)
   .concat([400, 500, 600].map((w) => `${w} 40px "Inter"`), ['600 40px "Barlow Condensed"'])
 
-function Section({ title, sub, decls }: { title: string; sub: string; decls: { d: PageDecl; label: string }[] }) {
+function Section({ title, sub, decls, content = CONTENT }: { title: string; sub: string; decls: { d: PageDecl; label: string }[]; content?: Content }) {
   const fonts = FONT_SETS[0]
   return (
     <section className="gle-section">
@@ -35,7 +36,7 @@ function Section({ title, sub, decls }: { title: string; sub: string; decls: { d
       <div className="gle-grid">
         {decls.map(({ d, label }, i) => (
           <figure key={d.id} className="gle-page">
-            <PageSvg page={renderPage(d, CONTENT, DOC, fonts, i)} assets={ASSETS} fonts={fonts} />
+            <PageSvg page={renderPage(d, content, DOC, fonts, i)} assets={ASSETS} fonts={fonts} />
             <figcaption>
               <span className="gle-num">{label}</span>
               <strong>{d.name}</strong>
@@ -96,11 +97,23 @@ export default function App() {
             decls={[{ d: BASE, label: '기준' }, ...COVERS.map((d, i) => ({ d, label: num(i + 1) }))]}
           />
         )}
-        {tab === 'content' && (
+        {tab === 'content' && PAGE_CONTENT.map((p) => {
+          const decls = contentDecls(p.content, DOC, p.asset)
+          return (
+            <Section
+              key={p.page}
+              title={`내지 변주 5 · ${p.content.pkr[0]} (원본 ${p.page}쪽)`}
+              sub="원본 심볼 장을 기본형으로 · 제목·설명·개체·하단 캡션 위치와 개체 뒤 상자만 바꿈 · 같은 선언을 쪽마다 그림 · 개체는 단 수·높이 상자 안에 맞춤"
+              content={p.content}
+              decls={[{ d: decls.base, label: '기준' }, ...decls.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
+            />
+          )
+        })}
+        {tab === 'divider' && (
           <Section
-            title="내지 변주 5"
-            sub="원본 심볼 장을 기본형으로 · 제목·설명·개체·하단 캡션(폴리오) 위치와 개체 뒤 상자만 바꿈 · 원본 줄바꿈 그대로 · 자간 −2% · 장평 100%"
-            decls={[{ d: CONTENT_DECLS.base, label: '기준' }, ...CONTENT_DECLS.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
+            title="간지 디벨롭 · 04 08 09 10"
+            sub="고른 넷을 두 갈래씩 더 밀어 봄 · 번호는 원래 변주 번호-갈래"
+            decls={dividerDevelop(CONTENT)}
           />
         )}
         {tab === 'divider' && (
