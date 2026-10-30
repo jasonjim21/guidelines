@@ -86,6 +86,8 @@ export interface Block {
   items: Item[]
   /** x를 단 선 대신 쪽 가운데로 */
   pageCenter?: boolean
+  /** x를 단 선 대신 앞 블록(번호)의 글 오른쪽 끝(잉크)에서 gap(px) 띄운 자리로 — 글 길이를 따라가는 배치 */
+  beside?: { block: number; gap: number }
 }
 
 /** 색 면. 단·행 선 번호, 'edge'는 재단선까지 */
@@ -206,11 +208,14 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
     els.push({ t: 'rect', id: id(), box: [x0, y0, x1 - x0, y1 - y0], fill: C[f.tone] })
   })
 
+  /** 블록마다 글 잉크의 오른쪽 끝 — beside가 참조한다 */
+  const inkRight: number[] = []
   for (const b of d.blocks) {
+    let right = -Infinity
     const total = b.items.reduce((h, it, i) => h + itemH(it, c, doc, fonts) + (i < b.items.length - 1 ? it.gap ?? 0 : 0), 0)
     const Y = rowY(b.y)
     let y = b.valign === 'top' ? Y : b.valign === 'bottom' ? Y - total : Y - total / 2
-    const X = b.pageCenter ? PAGE.w / 2 : colX(b.x)
+    const X = b.beside ? inkRight[b.beside.block] + b.beside.gap : b.pageCenter ? PAGE.w / 2 : colX(b.x)
 
     for (const it of b.items) {
       if (it.k === 'text') {
@@ -221,6 +226,7 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
           const ink = inkBounds(f.upper ? s.toUpperCase() : s, it.size, f.family, f.weight)
           const x = b.align === 'left' ? X - ink.left : b.align === 'right' ? X - ink.right : X - (ink.left + ink.right) / 2
           els.push({ t: 'text', id: id(), s, x, y: y + it.size * CAP + i * pitch, size: it.size, font: it.font, fill: C[it.tone], anchor: 'start', opacity: it.opacity })
+          right = Math.max(right, x + ink.right)
         })
       } else if (it.k === 'row') {
         // 칸들을 정렬선 0 기준으로 먼저 놓고, 잉크 전체 폭으로 블록 정렬(왼·가운데·오른)에 맞춘다
@@ -240,6 +246,7 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
         for (const { cell, x } of placed) {
           els.push({ t: 'text', id: id(), s: cell.s, x: x + shift, y: base, size: cell.size, font: cell.font, fill: C[cell.tone], anchor: 'start', opacity: cell.opacity })
         }
+        right = Math.max(right, inkR + shift)
       } else if (it.k === 'space') {
         // 간격만
       } else if (it.k === 'logo') {
@@ -258,6 +265,7 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
       }
       y += itemH(it, c, doc, fonts) + (it.gap ?? 0)
     }
+    inkRight.push(right)
   }
   return { page, w: PAGE.w, h: PAGE.h, els }
 }

@@ -55,16 +55,6 @@ export function contentDecls(c: Content, doc: Doc, asset: LogoAsset): { base: Pa
 
   const variants: PageDecl[] = [
     {
-      id: 'p01', name: '오른쪽 상자 위 개체', note: '원본 배치 그대로 두고, 개체 뒤 오른쪽 2/3(4–12단, 위아래 여백까지)에 옅은 상자(주조색 5%). 제목·설명·폴리오는 원본 자리',
-      bg: 'white',
-      fields: [{ x0: 4, x1: 12, y0: 0, y1: 8, tone: 'tint' }],
-      blocks: [
-        { x: 0, y: 0, align: 'left', valign: 'top', items: [title(c), body(1.6)] },
-        { x: 8, y: 4, align: 'center', valign: 'middle', items: [{ k: 'logo', asset, cols: 6, h: 460, mode: 'color' }] },
-        folioAt(0, 'left'),
-      ],
-    },
-    {
       id: 'p02', name: '왼쪽 상자에 글', note: '왼쪽을 옅은 회색 면으로 깔고(3.6단 폭, 원본 1/3보다 좁게) 제목·설명을 그 안 위쪽에. 개체는 흰 면 가운데, 폴리오는 오른쪽 아래',
       bg: 'white',
       fields: [{ x0: 'edge', x1: 3.6, y0: 'edge', y1: 'edge', tone: 'gray' }],
@@ -84,13 +74,13 @@ export function contentDecls(c: Content, doc: Doc, asset: LogoAsset): { base: Pa
       ],
     },
     {
-      id: 'p05', name: '개체 위 · 글 아래', note: '개체를 위쪽 가운데에 크게. 제목은 왼쪽, 설명은 4단 선에서 줄을 길게(6단 폭) 다시 짜 같은 바닥선에. 폴리오는 맨 아래 왼쪽',
+      id: 'p05', name: '개체 위 · 글 아래', note: '개체를 위쪽 가운데에 크게. 제목은 원래 폴리오 자리(왼쪽 아래 바닥선), 설명은 제목 끝에서 100px 띄워 6단 폭으로 같은 바닥선에. 폴리오는 오른쪽 아래',
       bg: 'white',
       blocks: [
         { x: 6, y: 2.9, pageCenter: true, align: 'center', valign: 'middle', items: [{ k: 'logo', asset, cols: 10, h: 380, mode: 'color' }] },
-        { x: 0, y: 7.2, align: 'left', valign: 'bottom', items: [{ ...title(c), gap: 0 }] },
-        { x: 4, y: 7.2, align: 'left', valign: 'bottom', items: [body(1.6, 'ink', 6)] },
-        folioAt(0, 'left'),
+        { x: 0, y: 8, align: 'left', valign: 'bottom', items: [{ ...title(c), gap: 0 }] },
+        { x: 0, y: 8, beside: { block: 1, gap: 100 }, align: 'left', valign: 'bottom', items: [body(1.6, 'ink', 6)] },
+        folioAt(12, 'right'),
       ],
     },
   ]
