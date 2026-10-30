@@ -39,11 +39,11 @@ export function tocContent(doc: Doc): TocSection[] {
   return sections
 }
 
-const no = (i: number) => String(i + 1).padStart(2, '0')
+export const no = (i: number) => String(i + 1).padStart(2, '0')
 
 /* ---------- 항목 줄 만들기 ---------- */
 
-interface Line {
+export interface Line {
   kr: { size: number; font: Font; tone: Tone; opacity?: number }
   en: { size: number; font: Font; tone: Tone; opacity?: number }
   /** 번호 칸 — 있으면 맨 앞, 국문은 numW 뒤에서 시작 */
@@ -51,7 +51,7 @@ interface Line {
   gap: number
 }
 
-function rows(items: TocItem[], ln: Line, from = 0): Item[] {
+export function rows(items: TocItem[], ln: Line, from = 0): Item[] {
   return items.map((it, i) => ({
     k: 'row' as const,
     gap: ln.gap,
