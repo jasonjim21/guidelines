@@ -56,7 +56,7 @@ export default function App() {
   return (
     <div className="gle">
       <Section
-        title="목차 변주 4"
+        title="목차 변주 10"
         sub="원본 목차를 기본형으로 · 응용 시스템은 명함·소봉투·대봉투·쇼핑백·티셔츠 · 자간 −2% · 장평 100%"
         decls={[{ d: TOC_DECLS.base, label: '기준' }, ...TOC_DECLS.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
       />

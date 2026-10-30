@@ -113,7 +113,7 @@ export const COVERS: PageDecl[] = [
       ] },
       { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
         { k: 'text', part: 'brand', size: 40, font: 'esamanruOTFMedium', tone: 'light', gap: 40 },
-        { k: 'text', part: 'enTitle', size: 120, font: 'Inter-Medium', tone: 'light', lead: 1.08 },
+        { k: 'text', part: 'enTitle', size: 120, font: 'esamanruOTFMedium', tone: 'light', lead: 1.05 },
       ] },
       { x: 12, y: 8, align: 'right', valign: 'bottom', items: [
         { k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone: 'light' },
@@ -175,7 +175,7 @@ export const COVERS: PageDecl[] = [
     blocks: [
       { x: 6, y: 3.8, pageCenter: true, align: 'center', valign: 'middle', items: [
         { k: 'text', part: 'brand', size: 36, font: 'esamanruOTFMedium', tone: 'blue', gap: 44 },
-        { k: 'text', part: 'enTitle', size: 96, font: 'Inter-SemiBold', tone: 'black', lead: 1.1 },
+        { k: 'text', part: 'enTitle', size: 96, font: 'esamanruOTFMedium', tone: 'black', lead: 1.08 },
       ] },
       { x: 6, y: 8, pageCenter: true, align: 'center', valign: 'bottom', items: [
         { k: 'logo', asset: 'small', h: 48, mode: 'color', gap: 28 },
@@ -208,8 +208,8 @@ export function coverContent(doc: Doc): Content {
     folio: [folio],
     /** 단어마다 한 줄 (압축 대문자용) */
     en: enWords,
-    /** 두 줄: 'Corporate Identity' / 'Guidelines' */
-    enTitle: [enWords.slice(0, -1).join(' '), enWords[enWords.length - 1]],
+    /** 두 줄 대문자: 'CORPORATE IDENTITY' / 'GUIDELINES' — 표지 제목은 대문자로만 */
+    enTitle: [enWords.slice(0, -1).join(' '), enWords[enWords.length - 1]].map((x) => x.toUpperCase()),
     enLine: [enWords.join(' ')],
   }
 }

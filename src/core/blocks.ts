@@ -57,7 +57,7 @@ export interface Cell extends TextStyle { s: string; dx: number; flow?: boolean 
 export type Item =
   /** 내용 키(part)로 줄들을 받아 쌓는다 */
   | ({ k: 'text'; part: string; lead?: number; gap?: number } & TextStyle)
-  /** 한 줄에 여러 칸 (번호 · 국문 · 영문처럼). 왼쪽 정렬 블록에서만 쓴다 */
+  /** 한 줄에 여러 칸 (번호 · 국문 · 영문처럼). 블록 정렬은 줄 전체의 잉크 폭에 맞춘다 */
   | { k: 'row'; cells: Cell[]; gap?: number }
   /** 빈 간격 */
   | { k: 'space'; h: number; gap?: number }
@@ -179,14 +179,22 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
           els.push({ t: 'text', id: id(), s, x, y: y + it.size * CAP + i * pitch, size: it.size, font: it.font, fill: C[it.tone], anchor: 'start', opacity: it.opacity })
         })
       } else if (it.k === 'row') {
+        // 칸들을 정렬선 0 기준으로 먼저 놓고, 잉크 전체 폭으로 블록 정렬(왼·가운데·오른)에 맞춘다
         const base = y + Math.max(...it.cells.map((x) => x.size)) * CAP
-        let end = X
+        const placed: { cell: Cell; x: number }[] = []
+        let end = 0, inkL = Infinity, inkR = -Infinity
         for (const cell of it.cells) {
           const f = faceOf(fonts, cell.font)
           const ink = inkBounds(f.upper ? cell.s.toUpperCase() : cell.s, cell.size, f.family, f.weight)
-          const x = cell.flow ? end + cell.dx : X + cell.dx - ink.left
-          els.push({ t: 'text', id: id(), s: cell.s, x, y: base, size: cell.size, font: cell.font, fill: C[cell.tone], anchor: 'start', opacity: cell.opacity })
+          const x = cell.flow ? end + cell.dx : cell.dx - ink.left
+          placed.push({ cell, x })
+          inkL = Math.min(inkL, x + ink.left)
+          inkR = Math.max(inkR, x + ink.right)
           end = x + ink.advance
+        }
+        const shift = b.align === 'left' ? X : b.align === 'right' ? X - inkR : X - (inkL + inkR) / 2
+        for (const { cell, x } of placed) {
+          els.push({ t: 'text', id: id(), s: cell.s, x: x + shift, y: base, size: cell.size, font: cell.font, fill: C[cell.tone], anchor: 'start', opacity: cell.opacity })
         }
       } else if (it.k === 'space') {
         // 간격만

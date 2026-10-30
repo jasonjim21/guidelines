@@ -48,8 +48,6 @@ interface Line {
   en: { size: number; font: Font; tone: Tone; opacity?: number }
   /** 번호 칸 — 있으면 맨 앞, 국문은 numW 뒤에서 시작 */
   num?: { size: number; font: Font; tone: Tone; opacity?: number; w: number }
-  /** 국문과 영문 사이 */
-  sep?: { s: string; size: number; font: Font; tone: Tone; opacity?: number }
   gap: number
 }
 
@@ -60,8 +58,7 @@ function rows(items: TocItem[], ln: Line, from = 0): Item[] {
     cells: [
       ...(ln.num ? [{ s: no(from + i), dx: 0, ...ln.num }] : []),
       { s: it.kr, dx: ln.num ? ln.num.w : 0, ...ln.kr },
-      ...(ln.sep ? [{ ...ln.sep, dx: 10, flow: true }] : []),
-      { s: it.en, dx: ln.sep ? 10 : 14, flow: true, ...ln.en },
+      { s: it.en, dx: 14, flow: true, ...ln.en },
     ],
   }))
 }
@@ -80,8 +77,7 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
   /** 원본 목차 — 회색 바탕, 왼쪽 위 로고, 오른쪽 아래 두 단 (실측 그대로) */
   const ORIG: Line = {
     kr: { size: 20, font: 'esamanruOTFLight', tone: 'black' },
-    sep: { s: '|', size: 14, font: 'Pretendard-Light', tone: 'black' },
-    en: { size: 20, font: 'esamanruOTFLight', tone: 'black' },
+    en: { size: 20, font: 'esamanruOTFLight', tone: 'black', opacity: 0.45 },
     gap: 24.4,
   }
   const origCol = (s: TocSection, x: number, len: number): Block => ({
@@ -95,7 +91,7 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
     ],
   })
   const base: PageDecl = {
-    id: 't00', name: '원본', note: '회색 바탕 · 왼쪽 위 작은 로고 · 오른쪽 아래 두 단(국문 장 제목+영문, 괘선, 항목)',
+    id: 't00', name: '원본', note: '회색 바탕 · 왼쪽 위 작은 로고 · 오른쪽 아래 두 단(국문 장 제목+영문, 괘선, 항목). 구분표(|)를 빼고 영문을 옅게',
     bg: 'gray',
     blocks: [
       { x: 0, y: -0.121, align: 'left', valign: 'top', items: [{ k: 'logo', asset: 'small', h: 50.68, mode: 'color' }] },
@@ -155,14 +151,13 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
   const L3: Line = {
     num: { size: 16, font: 'Inter-Medium', tone: 'blue', w: 44 },
     kr: { size: 22, font: 'Pretendard-Medium', tone: 'ink' },
-    sep: { s: '|', size: 16, font: 'Pretendard-Light', tone: 'mute' },
     en: { size: 18, font: 'Inter-Regular', tone: 'mute' },
     gap: 26,
   }
   const [b1, b2] = split(basic.items, 2)
   const head3 = (si: number): Item[] => [
     { k: 'text', part: `n${si}`, size: 24, font: 'Inter-Medium', tone: 'light', opacity: 0.6, gap: 14 },
-    { k: 'text', part: `en${si}`, size: 56, font: 'Prohibition-Regular', tone: 'light', gap: 14 },
+    { k: 'text', part: `en${si}`, size: 56, font: 'Prohibition-Regular', tone: 'light', lead: 0.92, gap: 14 },
     { k: 'text', part: `kr${si}`, size: 24, font: 'esamanruOTFMedium', tone: 'light', gap: 56 },
   ]
   const v3: PageDecl = {
@@ -216,7 +211,167 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
     ],
   }
 
-  return { base, variants: [v1, v2, v3, v4] }
+  /* 05 — 먹색 바탕, 두 장을 각자 단의 가운데 축에 */
+  const L5: Line = {
+    kr: { size: 22, font: 'Pretendard-Medium', tone: 'white' },
+    en: { size: 18, font: 'Inter-Regular', tone: 'white', opacity: 0.45 },
+    gap: 26,
+  }
+  const center5 = (s: TocSection, si: number, x: number): Block => ({
+    x, y: 0.8, align: 'center', valign: 'top', items: [
+      { k: 'text', part: `n${si}`, size: 24, font: 'Inter-Medium', tone: 'blue', gap: 20 },
+      { k: 'text', part: `enl${si}`, size: 64, font: 'Prohibition-Regular', tone: 'white', gap: 16 },
+      { k: 'text', part: `kr${si}`, size: 24, font: 'esamanruOTFMedium', tone: 'white', opacity: 0.6, gap: 48 },
+      ...rows(s.items, L5),
+    ],
+  })
+  const v5: PageDecl = {
+    id: 't05', name: '먹색 · 가운데 정렬', note: '먹색 바탕. 쪽을 반으로 나눠 장마다 단 가운데 축에 장 번호·영문 장 제목·항목을 가운데 정렬. 두 장의 머리 높이를 맞춤',
+    bg: 'black',
+    blocks: [
+      { x: 6, y: 8, pageCenter: true, align: 'center', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 40, mode: 'reverse' }] },
+      center5(basic, 0, 3),
+      center5(app, 1, 9),
+    ],
+  }
+
+  /* 06 — 파랑 바탕, 왼쪽에 심볼을 크게, 오른쪽 한 단에 모든 항목을 이어서 */
+  const L6: Line = {
+    num: { size: 16, font: 'Inter-Medium', tone: 'light', opacity: 0.5, w: 44 },
+    kr: { size: 22, font: 'Pretendard-Medium', tone: 'light' },
+    en: { size: 18, font: 'Inter-Regular', tone: 'light', opacity: 0.5 },
+    gap: 22,
+  }
+  const head6 = (s: TocSection, si: number, gap: number): Item[] => [
+    { k: 'row', gap: 30, cells: [
+      { s: no(si), dx: 0, size: 30, font: 'Prohibition-Regular', tone: 'light', opacity: 0.5 },
+      { s: s.en.toUpperCase(), dx: 44, size: 30, font: 'Prohibition-Regular', tone: 'light' },
+      { s: s.kr, dx: 14, flow: true, size: 22, font: 'esamanruOTFMedium', tone: 'light', opacity: 0.6 },
+    ] },
+    ...rows(s.items, L6).map((it, i, a) => (i === a.length - 1 ? { ...it, gap } : it)),
+  ]
+  const v6: PageDecl = {
+    id: 't06', name: '심볼 + 한 단 목록', note: '파랑 바탕 왼쪽 아래에 심볼을 단색으로 크게, 오른쪽 한 단에 두 장의 항목을 이어서 (바닥선에 맞춤)',
+    bg: 'blue',
+    blocks: [
+      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [{ k: 'logo', asset: 'symbol', cols: 5.5, mode: 'mono', tone: 'light' }] },
+      { x: 8, y: 8, align: 'left', valign: 'bottom', items: [...head6(basic, 0, 56), ...head6(app, 1, 0)] },
+    ],
+  }
+
+  /* 07 — 회색 바탕, 오른쪽 정렬 두 단 */
+  const L7: Line = {
+    kr: { size: 22, font: 'Pretendard-Medium', tone: 'black' },
+    en: { size: 18, font: 'Inter-Regular', tone: 'black', opacity: 0.45 },
+    gap: 26,
+  }
+  const right7 = (s: TocSection, si: number, x: number): Block => ({
+    x, y: 0, align: 'right', valign: 'top', items: [
+      { k: 'text', part: `en${si}`, size: 72, font: 'Prohibition-Regular', tone: 'blue', lead: 0.92, gap: 18 },
+      { k: 'text', part: `kr${si}`, size: 24, font: 'esamanruOTFMedium', tone: 'black', gap: 28 },
+      { k: 'rule', len: 3, tone: 'black', w: 1, opacity: 0.5, gap: 28 },
+      ...rows(s.items, L7),
+    ],
+  })
+  const v7: PageDecl = {
+    id: 't07', name: '오른쪽 정렬', note: '원본 회색 바탕. 두 단을 8단·12단 선에 오른쪽 정렬하고, 로고는 왼쪽 아래',
+    bg: 'gray',
+    blocks: [
+      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      right7(basic, 0, 8),
+      right7(app, 1, 12),
+    ],
+  }
+
+  /* 08 — 흰 바탕, 항목마다 번호를 크게 단 타일 격자 */
+  const tile = (si: number, k: number, x: number, y: number): Block => ({
+    x, y, align: 'left', valign: 'top', items: [
+      { k: 'text', part: `s${si}i${k}no`, size: 40, font: 'Prohibition-Regular', tone: 'blue', gap: 16 },
+      { k: 'text', part: `s${si}i${k}kr`, size: 22, font: 'Pretendard-Medium', tone: 'ink', gap: 10 },
+      { k: 'text', part: `s${si}i${k}en`, size: 16, font: 'Inter-Regular', tone: 'mute' },
+    ],
+  })
+  const grid8 = (s: TocSection, si: number, y: number): Block[] => [
+    { x: 0, y, align: 'left', valign: 'top', items: [
+      { k: 'text', part: `kr${si}`, size: 30, font: 'esamanruOTFMedium', tone: 'black', gap: 14 },
+      { k: 'text', part: `enl${si}`, size: 27, font: 'Prohibition-Regular', tone: 'blue', opacity: 0.4 },
+    ] },
+    ...s.items.map((_, k) => tile(si, k, 3 + (k % 6) * 1.5, y + Math.floor(k / 6) * 1.55)),
+  ]
+  const v8: PageDecl = {
+    id: 't08', name: '번호 타일', note: '흰 바탕. 항목 하나를 번호·국문·영문 세 줄짜리 칸으로 만들어 9단에 여섯 칸씩 격자로',
+    bg: 'white',
+    blocks: [
+      { x: 0, y: 0, align: 'left', valign: 'top', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      ...grid8(basic, 0, 1.6),
+      ...grid8(app, 1, 5.6),
+    ],
+  }
+
+  /* 09 — 흰 바탕, 항목 사이에 옅은 괘선을 그은 표 */
+  const L9: Line = {
+    num: { size: 16, font: 'Inter-Medium', tone: 'blue', w: 48 },
+    kr: { size: 22, font: 'Pretendard-Medium', tone: 'ink' },
+    en: { size: 18, font: 'Inter-Regular', tone: 'mute' },
+    gap: 16,
+  }
+  const ruled = (items: TocItem[], len: number, from = 0): Item[] =>
+    rows(items, L9, from).flatMap((r) => [r, { k: 'rule' as const, len, tone: 'black' as Tone, w: 1, opacity: 0.12, gap: 16 }])
+  const [p1, p2] = split(basic.items, 2)
+  const v9: PageDecl = {
+    id: 't09', name: '괘선 표', note: '흰 바탕. 장 제목을 위에 크게 걸고, 항목 줄마다 옅은 괘선(12%)을 그어 표처럼. 기본 시스템 두 단 + 응용 시스템 한 단',
+    bg: 'white',
+    blocks: [
+      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
+      { x: 0, y: 0, align: 'left', valign: 'top', items: [
+        { k: 'text', part: 'enl0', size: 56, font: 'Prohibition-Regular', tone: 'black', gap: 14 },
+        { k: 'text', part: 'kr0', size: 22, font: 'esamanruOTFMedium', tone: 'blue', gap: 40 },
+        ...ruled(p1, 3.6),
+      ] },
+      { x: 4, y: 0, align: 'left', valign: 'top', items: [
+        { k: 'space', h: 56 * 0.74, gap: 14 }, { k: 'space', h: 22 * 0.74, gap: 40 },
+        ...ruled(p2, 3.6, p1.length),
+      ] },
+      { x: 8, y: 0, align: 'left', valign: 'top', items: [
+        { k: 'text', part: 'enl1', size: 56, font: 'Prohibition-Regular', tone: 'black', gap: 14 },
+        { k: 'text', part: 'kr1', size: 22, font: 'esamanruOTFMedium', tone: 'blue', gap: 40 },
+        ...ruled(app.items, 4),
+      ] },
+    ],
+  }
+
+  /* 10 — 오른쪽 1/3을 파랑 면으로, 응용 시스템만 색면에 */
+  const L10a: Line = {
+    num: { size: 16, font: 'Inter-Medium', tone: 'blue', w: 44 },
+    kr: { size: 22, font: 'Pretendard-Medium', tone: 'ink' },
+    en: { size: 18, font: 'Inter-Regular', tone: 'mute' },
+    gap: 26,
+  }
+  const L10b: Line = {
+    num: { size: 16, font: 'Inter-Medium', tone: 'light', opacity: 0.5, w: 44 },
+    kr: { size: 22, font: 'Pretendard-Medium', tone: 'light' },
+    en: { size: 18, font: 'Inter-Regular', tone: 'light', opacity: 0.5 },
+    gap: 26,
+  }
+  const [q1, q2] = split(basic.items, 2)
+  const head10 = (si: number, tone: Tone): Item[] => [
+    { k: 'text', part: `en${si}`, size: 80, font: 'Prohibition-Regular', tone, lead: 0.92, gap: 18 },
+    { k: 'text', part: `kr${si}`, size: 24, font: 'esamanruOTFMedium', tone, opacity: 0.6 },
+  ]
+  const v10: PageDecl = {
+    id: 't10', name: '오른쪽 1/3 색면', note: '흰 바탕 오른쪽 1/3(8단 선부터)을 파랑 면으로. 기본 시스템은 흰 면에 두 단, 응용 시스템은 색면에. 장 제목은 위, 항목은 바닥선',
+    bg: 'white',
+    fields: [{ x0: 8, x1: 'edge', y0: 'edge', y1: 'edge', tone: 'blue' }],
+    blocks: [
+      { x: 0, y: 0, align: 'left', valign: 'top', items: head10(0, 'black') },
+      { x: 0, y: 8, align: 'left', valign: 'bottom', items: rows(q1, L10a) },
+      { x: 4, y: 8, align: 'left', valign: 'bottom', items: rows(q2, L10a, q1.length).concat(Array(q1.length - q2.length).fill(0).map(() => ({ k: 'space' as const, h: 22 * 0.74, gap: 26 }))) },
+      { x: 8.5, y: 0, align: 'left', valign: 'top', items: head10(1, 'light') },
+      { x: 8.5, y: 8, align: 'left', valign: 'bottom', items: rows(app.items, L10b) },
+    ],
+  }
+
+  return { base, variants: [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] }
 }
 
 /** 목차 블록이 쓰는 내용 키 */
@@ -227,6 +382,11 @@ export function tocText(sec: TocSection[]): Record<string, string[]> {
     out[`en${i}`] = s.en.split(/\s+/)
     out[`enl${i}`] = [s.en]
     out[`n${i}`] = [no(i)]
+    s.items.forEach((it, k) => {
+      out[`s${i}i${k}no`] = [no(k)]
+      out[`s${i}i${k}kr`] = [it.kr]
+      out[`s${i}i${k}en`] = [it.en]
+    })
   })
   return out
 }
