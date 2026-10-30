@@ -5,6 +5,9 @@ import { faceOf, type FontSet } from './fonts'
  * 좌표 원자료 → SVG. 유일한 렌더러다. 화면 미리보기와 PDF 출력이 이 컴포넌트 하나를 쓴다.
  * 두 번째 렌더러를 만들지 말 것.
  */
+/** 자간 -2% — 모든 글에 적용한다 (0을 넘기지 않는다) */
+export const TRACK = -0.02
+
 const clipKey = (b: number[]) => b.map((v) => Math.round(v)).join('_')
 
 function ElNode({ el, assets, fonts, cid, pid }: { el: El; assets: Assets; fonts: FontSet; cid: (b: number[]) => string; pid: (k: string) => string }) {
@@ -23,13 +26,13 @@ function ElNode({ el, assets, fonts, cid, pid }: { el: El; assets: Assets; fonts
       return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={el.stroke} strokeWidth={el.sw} {...common} />
     }
     case 'path': {
-      const d = assets[el.id]
+      const d = assets[el.ref ?? el.id]
       if (!d) {
         const [x, y, w, h] = el.box
         return <rect x={x} y={y} width={w} height={h} fill={el.fill ? el.fill : 'none'} fillOpacity={el.fill ? 0.25 : undefined} stroke={el.stroke ?? el.fill} strokeWidth={1} {...common} />
       }
       return (
-        <path d={d} fill={el.fill ?? 'none'} fillOpacity={el.fillOpacity} fillRule={el.evenodd ? 'evenodd' : 'nonzero'}
+        <path d={d} transform={el.tf ? `translate(${el.tf[1]} ${el.tf[2]}) scale(${el.tf[0]})` : undefined} fill={el.fill ?? 'none'} fillOpacity={el.fillOpacity} fillRule={el.evenodd ? 'evenodd' : 'nonzero'}
           stroke={el.stroke} strokeWidth={el.stroke ? el.sw : undefined} strokeMiterlimit={10} {...common} />
       )
     }
@@ -43,9 +46,11 @@ function ElNode({ el, assets, fonts, cid, pid }: { el: El; assets: Assets; fonts
     case 'text': {
       const f = faceOf(fonts, el.font)
       const s = f.upper ? el.s.toUpperCase() : el.s
+      const fit = f.fit && el.w
       return (
         <text x={el.x} y={el.y} fontFamily={f.family} fontSize={el.size} fontWeight={f.weight} fill={el.fill}
-          textLength={f.fit ? el.w : undefined} lengthAdjust={f.fit ? 'spacingAndGlyphs' : undefined}
+          letterSpacing={TRACK * el.size} textAnchor={el.anchor}
+          textLength={fit ? el.w : undefined} lengthAdjust={fit ? 'spacingAndGlyphs' : undefined}
           xmlSpace="preserve" {...common}>{s}</text>
       )
     }

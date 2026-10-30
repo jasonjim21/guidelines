@@ -29,11 +29,17 @@
 .gle h1, .gle p, .gle figure { margin: 0; }
 .gle svg { display: block; width: 100%; height: auto; }
 
-.gle .gle-bar { padding-block: 20px 16px; max-width: 1600px; margin-inline: auto; }
-.gle .gle-bar h1 { font-size: 17px; font-weight: 700; }
+.gle .gle-bar, .gle .gle-section { max-width: 1680px; margin-inline: auto; }
+.gle .gle-bar { padding-block: 20px 16px; }
+.gle .gle-bar h1 { font-size: 18px; font-weight: 700; }
 .gle .gle-bar p { font-size: 13px; color: var(--mute); }
+.gle .gle-section { padding-block: 8px 40px; }
+.gle .gle-section h2 { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
 
-.gle .gle-pages { display: flex; flex-direction: column; gap: 28px; max-width: 1600px; margin-inline: auto; }
-.gle .gle-page { display: flex; flex-direction: column; gap: 6px; }
+.gle .gle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 32px 24px; }
+.gle .gle-page { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .gle .gle-page svg { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 20px rgba(0, 0, 0, 0.08); }
-.gle .gle-page figcaption { font-size: 13px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.gle .gle-page figcaption { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; font-size: 13px; }
+.gle .gle-num { font-variant-numeric: tabular-nums; color: var(--mute); }
+.gle .gle-page strong { font-size: 14px; font-weight: 700; }
+.gle .gle-note { flex-basis: 100%; color: var(--mute); line-height: 1.5; }

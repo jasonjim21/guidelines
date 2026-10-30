@@ -17,9 +17,20 @@ interface Base {
 export type El =
   | (Base & { t: 'rect'; box: Box; fill?: string; fillOpacity?: number })
   | (Base & { t: 'line'; box: Box; pts: [number, number, number, number]; stroke: string; sw: number; dash?: string })
-  | (Base & { t: 'path'; box: Box; fill?: string; fillOpacity?: number; stroke?: string; sw?: number; evenodd?: boolean; dash?: string })
+  | (Base & {
+      t: 'path'; box: Box; fill?: string; fillOpacity?: number; stroke?: string; sw?: number; evenodd?: boolean; dash?: string
+      /** 다른 요소의 모양을 빌려 쓴다 (assets 키). 없으면 자기 id */
+      ref?: string
+      /** 빌린 모양을 옮기고 키운다: [배율, x 이동, y 이동] */
+      tf?: [number, number, number]
+    })
   | (Base & { t: 'image'; box: Box })
-  | (Base & { t: 'text'; s: string; x: number; y: number; w: number; size: number; font: string; fill: string })
+  | (Base & {
+      t: 'text'; s: string; x: number; y: number; size: number; font: string; fill: string
+      /** 원본 줄 폭. 있으면 대체 서체를 이 폭에 맞춘다 (원본 재현용) */
+      w?: number
+      anchor?: 'start' | 'middle' | 'end'
+    })
 
 export interface DocPage { page: number; w: number; h: number; els: El[] }
 export interface Doc { source: string; unit: string; fonts: string[]; pages: DocPage[] }
