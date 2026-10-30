@@ -60,3 +60,6 @@
 .gle .gle-tabs button:disabled { cursor: default; opacity: 0.55; }
 .gle .gle-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .gle .gle-soon { margin-left: 6px; font-size: 13px; font-weight: 400; }
+
+/* ---------- 원본 재현 (#original) ---------- */
+.gle .gle-original { display: flex; flex-direction: column; gap: 24px; max-width: 1920px; margin-inline: auto; padding-block: 24px; }

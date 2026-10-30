@@ -100,6 +100,16 @@ npm run build && node scripts/compare.mjs /tmp/orig shots/compare   # 쪽마다 
 현재(fuzz 12%) 다른 픽셀 0.1–4.6%. 남는 차이는 대체 서체(이사만루체·Prohibition)의 글자 모양,
 사진 잘림 위치, 그라데이션(셰이딩)을 사진으로 받은 것. 배치·글줄·색은 일치.
 
+## 원본 재현 HTML 한 파일로 내보내기
+
+```bash
+npm run build && node scripts/export-html.mjs   # export/samwoo-ci-v1.html (서체·그림 내장, 인터넷 없이 열림)
+```
+
+빌드된 화면의 `#original`(원본 재현 17장, 원본 자간 그대로 — 변주의 −2%는 걸지 않는다)에서 SVG를 그대로 꺼내
+Pretendard(번들)·Inter·Barlow Condensed(라틴 구간)를 data URL로 품는다. 브라우저 인쇄 시 1920×1080 한 장씩.
+로고 패스·사진이 들어가므로 `export/`는 gitignore.
+
 ## 아티팩트로 올리기
 
 ```bash

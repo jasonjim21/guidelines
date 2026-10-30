@@ -12,7 +12,7 @@ export const TRACK = -0.02
 
 const clipKey = (b: number[]) => b.map((v) => Math.round(v)).join('_')
 
-function ElNode({ el, assets, fonts, cid, pid }: { el: El; assets: Assets; fonts: FontSet; cid: (b: number[]) => string; pid: (k: string) => string }) {
+function ElNode({ el, assets, fonts, cid, pid, track }: { el: El; assets: Assets; fonts: FontSet; cid: (b: number[]) => string; pid: (k: string) => string; track: number }) {
   const shape = el.clipPath && assets[el.clipPath] ? el.clipPath : null
   const common = {
     opacity: el.opacity,
@@ -50,14 +50,15 @@ function ElNode({ el, assets, fonts, cid, pid }: { el: El; assets: Assets; fonts
       const s = f.upper ? el.s.toUpperCase() : el.s
       return (
         <text x={el.x} y={el.y} fontFamily={f.family} fontSize={el.size} fontWeight={f.weight} fill={el.fill}
-          letterSpacing={TRACK * el.size} textAnchor={el.anchor}
+          letterSpacing={track ? track * el.size : undefined} textAnchor={el.anchor}
           xmlSpace="preserve" {...common}>{s}</text>
       )
     }
   }
 }
 
-export function PageSvg({ page, assets, fonts }: { page: DocPage; assets: Assets; fonts: FontSet }) {
+/** track: 자간(em). 변주는 −2%, 원본 재현은 원본 그대로(0) */
+export function PageSvg({ page, assets, fonts, track = TRACK }: { page: DocPage; assets: Assets; fonts: FontSet; track?: number }) {
   const clips = new Map<string, number[]>()
   page.els.forEach((e) => { if (e.clip) clips.set(clipKey(e.clip), e.clip) })
   const cid = (b: number[]) => `c${page.page}_${clipKey(b)}`
@@ -72,7 +73,7 @@ export function PageSvg({ page, assets, fonts }: { page: DocPage; assets: Assets
         {[...shapes].map((k) => <clipPath key={k} id={pid(k)}><path d={assets[k]} /></clipPath>)}
       </defs>
       <rect x={0} y={0} width={page.w} height={page.h} fill="#ffffff" />
-      {page.els.map((el) => <ElNode key={el.id} el={el} assets={assets} fonts={fonts} cid={cid} pid={pid} />)}
+      {page.els.map((el) => <ElNode key={el.id} el={el} assets={assets} fonts={fonts} cid={cid} pid={pid} track={track} />)}
     </svg>
   )
 }

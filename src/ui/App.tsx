@@ -63,6 +63,8 @@ const readHash = (): Tab => {
   } catch { return 'cover' }
 }
 
+const isOriginal = (() => { try { return location.hash === '#original' } catch { return false } })()
+
 export default function App() {
   const [, setReady] = useState(0)
   const [tab, setTab] = useState<Tab>(readHash)
@@ -79,6 +81,16 @@ export default function App() {
     try { history.replaceState(null, '', `#${t}`) } catch { /* 주소를 못 바꿔도 탭은 바뀐다 */ }
   }
   const num = (i: number) => String(i).padStart(2, '0')
+  // #original — 원본 재현 17장만 (원본 자간 그대로). scripts/export-html.mjs가 이 화면을 HTML 한 파일로 뽑는다
+  if (isOriginal) {
+    return (
+      <div className="gle">
+        <main className="gle-original">
+          {DOC.pages.map((p) => <PageSvg key={p.page} page={p} assets={ASSETS} fonts={FONT_SETS[0]} track={0} />)}
+        </main>
+      </div>
+    )
+  }
   return (
     <div className="gle">
       <nav className="gle-tabs" role="tablist" aria-label="장표 유형">
