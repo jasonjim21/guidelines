@@ -217,8 +217,8 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
     en: { size: 18, font: 'Inter-Regular', tone: 'white', opacity: 0.45 },
     gap: 26,
   }
-  const center5 = (s: TocSection, si: number, x: number): Block => ({
-    x, y: 0.8, align: 'center', valign: 'top', items: [
+  const left5 = (s: TocSection, si: number, x: number): Block => ({
+    x, y: 0, align: 'left', valign: 'top', items: [
       { k: 'text', part: `n${si}`, size: 24, font: 'Inter-Medium', tone: 'blue', gap: 20 },
       { k: 'text', part: `enl${si}`, size: 64, font: 'Prohibition-Regular', tone: 'white', gap: 16 },
       { k: 'text', part: `kr${si}`, size: 24, font: 'esamanruOTFMedium', tone: 'white', opacity: 0.6, gap: 48 },
@@ -226,12 +226,12 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
     ],
   })
   const v5: PageDecl = {
-    id: 't05', name: '먹색 · 가운데 정렬', note: '먹색 바탕. 쪽을 반으로 나눠 장마다 단 가운데 축에 장 번호·영문 장 제목·항목을 가운데 정렬. 두 장의 머리 높이를 맞춤',
+    id: 't05', name: '먹색 · 반 나눔', note: '먹색 바탕. 쪽을 반으로 나눠 장마다 장 번호·영문 장 제목·항목을 왼쪽 정렬(0단·6단 선). 두 장의 머리 높이를 맞춤',
     bg: 'black',
     blocks: [
-      { x: 6, y: 8, pageCenter: true, align: 'center', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 40, mode: 'reverse' }] },
-      center5(basic, 0, 3),
-      center5(app, 1, 9),
+      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [{ k: 'logo', asset: 'small', h: 40, mode: 'reverse' }] },
+      left5(basic, 0, 0),
+      left5(app, 1, 6),
     ],
   }
 
@@ -359,7 +359,7 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
     { k: 'text', part: `kr${si}`, size: 24, font: 'esamanruOTFMedium', tone, opacity: 0.6 },
   ]
   const v10: PageDecl = {
-    id: 't10', name: '오른쪽 1/3 색면', note: '흰 바탕 오른쪽 1/3(8단 선부터)을 파랑 면으로. 기본 시스템은 흰 면에 두 단, 응용 시스템은 색면에. 장 제목은 위, 항목은 바닥선',
+    id: 't10', name: '오른쪽 1/3 색면', note: '흰 바탕 오른쪽 1/3(8단 선부터)을 파랑 면으로. 기본 시스템은 흰 면에 두 단, 응용 시스템은 색면에. 장 제목은 위, 항목 첫 줄은 세 단이 같은 높이',
     bg: 'white',
     fields: [{ x0: 8, x1: 'edge', y0: 'edge', y1: 'edge', tone: 'blue' }],
     blocks: [
@@ -367,7 +367,8 @@ export function tocDecls(sec: TocSection[]): { base: PageDecl; variants: PageDec
       { x: 0, y: 8, align: 'left', valign: 'bottom', items: rows(q1, L10a) },
       { x: 4, y: 8, align: 'left', valign: 'bottom', items: rows(q2, L10a, q1.length).concat(Array(q1.length - q2.length).fill(0).map(() => ({ k: 'space' as const, h: 22 * 0.74, gap: 26 }))) },
       { x: 8.5, y: 0, align: 'left', valign: 'top', items: head10(1, 'light') },
-      { x: 8.5, y: 8, align: 'left', valign: 'bottom', items: rows(app.items, L10b) },
+      // 응용 시스템 첫 줄을 기본 시스템 첫 줄(01 심볼) 높이에 맞춘다 — 모자란 줄 수만큼 아래를 비운다
+      { x: 8.5, y: 8, align: 'left', valign: 'bottom', items: rows(app.items, L10b).concat(Array(Math.max(0, q1.length - app.items.length)).fill(0).map(() => ({ k: 'space' as const, h: 22 * 0.74, gap: 26 }))) },
     ],
   }
 

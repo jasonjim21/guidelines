@@ -6,6 +6,8 @@
   --bg: #e9e9e6;
   --ink: #1c1d1b;
   --mute: #6c6e68;
+  --line: #d3d3ce;
+  --accent: #004ed8;
   color-scheme: light;
   min-height: 100%;
   background: var(--bg);
@@ -21,9 +23,9 @@
   padding-block: 0 48px;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .gle { --bg: #141513; --ink: #ecece6; --mute: #a1a39b; color-scheme: dark; }
+  :root:not([data-theme='light']) .gle { --bg: #141513; --ink: #ecece6; --mute: #a1a39b; --line: #33352f; --accent: #6f9dff; color-scheme: dark; }
 }
-:root[data-theme='dark'] .gle { --bg: #141513; --ink: #ecece6; --mute: #a1a39b; color-scheme: dark; }
+:root[data-theme='dark'] .gle { --bg: #141513; --ink: #ecece6; --mute: #a1a39b; --line: #33352f; --accent: #6f9dff; color-scheme: dark; }
 
 .gle *, .gle *::before, .gle *::after { box-sizing: inherit; }
 .gle h1, .gle p, .gle figure { margin: 0; }
@@ -43,3 +45,18 @@
 .gle .gle-num { font-variant-numeric: tabular-nums; color: var(--mute); }
 .gle .gle-page strong { font-size: 14px; font-weight: 700; }
 .gle .gle-note { flex-basis: 100%; color: var(--mute); line-height: 1.5; }
+
+/* ---------- 탭 ---------- */
+.gle .gle-tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2;
+  display: flex; gap: 4px; max-width: 1680px; margin-inline: auto;
+  padding-block: 14px 10px; background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.gle .gle-tabs button {
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--mute); letter-spacing: 0;
+  background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 14px 8px; cursor: pointer;
+}
+.gle .gle-tabs button[aria-selected='true'] { color: var(--ink); border-bottom-color: var(--accent); }
+.gle .gle-tabs button:disabled { cursor: default; opacity: 0.55; }
+.gle .gle-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gle .gle-soon { margin-left: 6px; font-size: 13px; font-weight: 400; }

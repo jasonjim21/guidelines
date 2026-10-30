@@ -45,26 +45,61 @@ function Section({ title, sub, decls }: { title: string; sub: string; decls: { d
   )
 }
 
+type Tab = 'cover' | 'toc' | 'divider'
+const TABS: { id: Tab; label: string; ready: boolean }[] = [
+  { id: 'cover', label: '표지', ready: true },
+  { id: 'toc', label: '목차', ready: true },
+  { id: 'divider', label: '간지', ready: false },
+]
+const readHash = (): Tab => {
+  try {
+    const h = location.hash.slice(1)
+    return TABS.some((t) => t.id === h && t.ready) ? (h as Tab) : 'cover'
+  } catch { return 'cover' }
+}
+
 export default function App() {
   const [, setReady] = useState(0)
+  const [tab, setTab] = useState<Tab>(readHash)
   useEffect(() => {
     const sample = Object.values(CONTENT).flat().join('')
     const all = sample + sample.toUpperCase()
     Promise.all(FACES.map((f) => document.fonts.load(f, all).catch(() => null))).then(() => setReady((n) => n + 1))
+    const onHash = () => setTab(readHash())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
   }, [])
+  const pick = (t: Tab) => {
+    setTab(t)
+    try { history.replaceState(null, '', `#${t}`) } catch { /* 주소를 못 바꿔도 탭은 바뀐다 */ }
+  }
   const num = (i: number) => String(i).padStart(2, '0')
   return (
     <div className="gle">
-      <Section
-        title="목차 변주 10"
-        sub="원본 목차를 기본형으로 · 응용 시스템은 명함·소봉투·대봉투·쇼핑백·티셔츠 · 자간 −2% · 장평 100%"
-        decls={[{ d: TOC_DECLS.base, label: '기준' }, ...TOC_DECLS.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
-      />
-      <Section
-        title="표지 변주 10"
-        sub="원본 표지를 기본형으로 · 01–05 로고를 크게, 06–10 글로 짜기 · 02·05·06·10 영문 제목 · 배경 그래픽 없음"
-        decls={[{ d: BASE, label: '기준' }, ...COVERS.map((d, i) => ({ d, label: num(i + 1) }))]}
-      />
+      <nav className="gle-tabs" role="tablist" aria-label="장표 유형">
+        {TABS.map((t) => (
+          <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} disabled={!t.ready}
+            onClick={() => pick(t.id)}>
+            {t.label}{!t.ready && <span className="gle-soon">준비 중</span>}
+          </button>
+        ))}
+      </nav>
+      <div role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {tab === 'cover' && (
+          <Section
+            title="표지 변주 10"
+            sub="원본 표지를 기본형으로 · 01–05 로고를 크게, 06–10 글로 짜기 · 영문 제목 대문자 · 배경 그래픽 없음 · 자간 −2% · 장평 100%"
+            decls={[{ d: BASE, label: '기준' }, ...COVERS.map((d, i) => ({ d, label: num(i + 1) }))]}
+          />
+        )}
+        {tab === 'toc' && (
+          <Section
+            title="목차 변주 10"
+            sub="원본 목차를 기본형으로 · 응용 시스템은 명함·소봉투·대봉투·쇼핑백·티셔츠 · 구분표 없이 영문을 옅게 · 자간 −2% · 장평 100%"
+            decls={[{ d: TOC_DECLS.base, label: '기준' }, ...TOC_DECLS.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
+          />
+        )}
+      </div>
     </div>
   )
 }
