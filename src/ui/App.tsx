@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import raw from '../../references/samwoo-ci-v1.json'
 import type { Assets, Doc } from '../core/doc'
 import { FONT_SETS } from '../core/fonts'
@@ -12,8 +13,16 @@ const ASSETS: Assets = (Object.values(local)[0] as Assets | undefined) ?? {}
 
 const CONTENT = coverContent(DOC)
 
+/** 정렬을 획 끝으로 맞추려면 실제 서체로 재야 한다 — 서체를 받은 뒤 한 번 더 그린다 */
+const FACES = ['800 40px "Pretendard Variable"', '700 40px "Pretendard Variable"', '600 40px "Pretendard Variable"', '500 40px "Pretendard Variable"', '400 40px "Pretendard Variable"', '400 40px "Inter"', '600 40px "Barlow Condensed"']
+
 export default function App() {
   const fonts = FONT_SETS[0]
+  const [, setReady] = useState(0)
+  useEffect(() => {
+    const sample = [CONTENT.brand, ...CONTENT.title, CONTENT.folio, ...CONTENT.en].join('') + CONTENT.en.join('').toUpperCase()
+    Promise.all(FACES.map((f) => document.fonts.load(f, sample).catch(() => null))).then(() => setReady((n) => n + 1))
+  }, [])
   return (
     <div className="gle">
       <header className="gle-bar">
@@ -25,7 +34,7 @@ export default function App() {
         <div className="gle-grid">
           {[BASE, ...COVERS].map((d, i) => (
             <figure key={d.id} className="gle-page">
-              <PageSvg page={renderCover(d, CONTENT, DOC, i)} assets={ASSETS} fonts={fonts} />
+              <PageSvg page={renderCover(d, CONTENT, DOC, fonts, i)} assets={ASSETS} fonts={fonts} />
               <figcaption>
                 <span className="gle-num">{d.id === BASE.id ? '기준' : String(i).padStart(2, '0')}</span>
                 <strong>{d.name}</strong>

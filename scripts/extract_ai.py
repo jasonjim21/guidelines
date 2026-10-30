@@ -196,7 +196,8 @@ def main(src, out):
                     el['pts'] = [R(p1.x), R(p1.y), R(p2.x), R(p2.y)]
                 else:
                     el['t'] = 'path'
-                    if it.get('even_odd'):
+                    # 사각형 여러 개가 한 패스면(ㅁ 받침처럼 바깥·안쪽) 방향 정보가 같게 나와 안쪽이 채워진다 → 짝홀 규칙으로 구멍을 낸다
+                    if it.get('even_odd') or sum(1 for x in items if x[0] == 're') >= 2:
                         el['evenodd'] = True
                     d = path_d(items)
                     if it.get('closePath') and not d.endswith('Z'):

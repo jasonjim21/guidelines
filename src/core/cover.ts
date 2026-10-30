@@ -1,4 +1,6 @@
 import type { Doc, DocPage, El } from './doc'
+import { faceOf, type FontSet } from './fonts'
+import { inkBounds } from './ink'
 
 /**
  * 표지 변주 — 원본 표지(1쪽)를 기본형으로, 글의 위치·표현·레이아웃·정렬만 바꾼다.
@@ -47,7 +49,7 @@ type Item =
    */
   | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; gap?: number }
   /** 가로 괘선. len은 단 수 */
-  | { k: 'rule'; len: number; tone: Tone; w?: number; gap?: number }
+  | { k: 'rule'; len: number; tone: Tone; w?: number; opacity?: number; gap?: number }
 
 interface Block {
   /** 그리드 선 번호 (단 0–12, 행 0–8) */
@@ -124,18 +126,22 @@ export const COVERS: CoverDecl[] = [
     ],
   },
   {
-    id: 'c03', name: '세로 시그니처 가운데', note: '흰 바탕 한가운데 세로형 시그니처를 원본 2색으로 크게. 제목은 아래 가운데 한 줄',
-    bg: 'white',
+    id: 'c03', name: '세로 시그니처 오른쪽', note: '파랑 바탕 오른쪽에 세로형 시그니처를 단색으로 쪽 높이 가까이 크게. 제목은 왼쪽 위, 폴리오는 왼쪽 아래',
+    bg: 'blue',
     blocks: [
-      { x: 6, y: 3.6, pageCenter: true, align: 'center', valign: 'middle', items: [
-        { k: 'logo', asset: 'sigV', h: 440, mode: 'color' },
+      { x: 0, y: 0, align: 'left', valign: 'top', items: [
+        { k: 'text', part: 'brand', size: 40, font: 'esamanruOTFMedium', tone: 'light', gap: 28 },
+        { k: 'text', part: 'title', size: 40, font: 'Pretendard-Medium', tone: 'light', lead: 1.3 },
       ] },
-      { x: 6, y: 8, pageCenter: true, align: 'center', valign: 'bottom', items: [
-        { k: 'text', part: 'titleLine', size: 30, font: 'Pretendard-Medium', tone: 'ink', gap: 20 },
-        { k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone: 'mute' },
+      { x: 12, y: 8, align: 'right', valign: 'bottom', items: [
+        { k: 'logo', asset: 'sigV', h: 640, mode: 'mono', tone: 'light' },
+      ] },
+      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
+        { k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone: 'light' },
       ] },
     ],
   },
+
   {
     id: 'c04', name: '가로 시그니처 먹색', note: '먹색 바탕 가운데 높이에 가로형 시그니처를 10단 폭으로. 검정 부분은 흰색, 파랑은 그대로',
     bg: 'black',
@@ -225,7 +231,7 @@ export const COVERS: CoverDecl[] = [
       ] },
       { x: 0, y: 4, align: 'left', valign: 'middle', items: [
         { k: 'text', part: 'brand', size: 64, font: 'esamanruOTFMedium', tone: 'black', gap: 36 },
-        { k: 'rule', len: 12, tone: 'black', w: 2, gap: 40 },
+        { k: 'rule', len: 12, tone: 'black', w: 1, opacity: 0.5, gap: 40 },
         { k: 'text', part: 'titleLine', size: 64, font: 'Pretendard-Medium', tone: 'blue' },
       ] },
       { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
@@ -234,22 +240,20 @@ export const COVERS: CoverDecl[] = [
     ],
   },
   {
-    id: 'c10', name: '아래 색 띠', note: '흰 바탕 아래 3/8을 파란 띠로. 제목은 띠 안 왼쪽, 브랜드명은 띠 안 오른쪽 정렬',
+    id: 'c10', name: '가운데 큰 제목', note: '흰 바탕 한가운데에 제목 두 줄을 크게 가운데 정렬. 브랜드명은 위에 주조색으로, 로고는 아래 가운데',
     bg: 'white',
-    fields: [{ x0: 'edge', x1: 'edge', y0: 5, y1: 'edge', tone: 'blue' }],
     blocks: [
-      { x: 0, y: 0, align: 'left', valign: 'top', items: [
-        { k: 'logo', asset: 'small', h: 64, mode: 'color' },
+      { x: 6, y: 3.8, pageCenter: true, align: 'center', valign: 'middle', items: [
+        { k: 'text', part: 'brand', size: 36, font: 'esamanruOTFMedium', tone: 'blue', gap: 44 },
+        { k: 'text', part: 'title', size: 96, font: 'Pretendard-SemiBold', tone: 'black', lead: 1.15 },
       ] },
-      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
-        { k: 'text', part: 'title', size: 64, font: 'Pretendard-Medium', tone: 'light', lead: 1.2, gap: 48 },
-        { k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone: 'light', opacity: 0.7 },
-      ] },
-      { x: 12, y: 8, align: 'right', valign: 'bottom', items: [
-        { k: 'text', part: 'brand', size: 140, font: 'esamanruOTFMedium', tone: 'light' },
+      { x: 6, y: 8, pageCenter: true, align: 'center', valign: 'bottom', items: [
+        { k: 'logo', asset: 'small', h: 48, mode: 'color', gap: 28 },
+        { k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone: 'mute' },
       ] },
     ],
   },
+
 ]
 
 /* ---------- 내용: 원본 표지에서 읽는다 ---------- */
@@ -325,7 +329,7 @@ function itemH(it: Item, c: CoverContent, doc: Doc): number {
 const edgeX = (v: number | 'edge', side: 0 | 1) => (v === 'edge' ? (side ? PAGE.w : 0) : colX(v))
 const edgeY = (v: number | 'edge', side: 0 | 1) => (v === 'edge' ? (side ? PAGE.h : 0) : rowY(v))
 
-export function renderCover(d: CoverDecl, c: CoverContent, doc: Doc, page = 0): DocPage {
+export function renderCover(d: CoverDecl, c: CoverContent, doc: Doc, fonts: FontSet, page = 0): DocPage {
   const els: El[] = []
   let n = 0
   const id = () => `${d.id}-${n++}`
@@ -340,13 +344,16 @@ export function renderCover(d: CoverDecl, c: CoverContent, doc: Doc, page = 0): 
     const Y = rowY(b.y)
     let y = b.valign === 'top' ? Y : b.valign === 'bottom' ? Y - total : Y - total / 2
     const X = b.pageCenter ? PAGE.w / 2 : colX(b.x)
-    const anchor = b.align === 'left' ? 'start' : b.align === 'right' ? 'end' : 'middle'
 
     for (const it of b.items) {
       if (it.k === 'text') {
         const pitch = it.size * (it.lead ?? 1.2)
+        const f = faceOf(fonts, it.font)
         lines(it.part, c).forEach((s, i) => {
-          els.push({ t: 'text', id: id(), s, x: X, y: y + it.size * CAP + i * pitch, size: it.size, font: it.font, fill: C[it.tone], anchor, opacity: it.opacity })
+          // 정렬선에 글자 상자가 아니라 획 끝을 맞춘다 (광학 정렬)
+          const ink = inkBounds(f.upper ? s.toUpperCase() : s, it.size, f.family, f.weight)
+          const x = b.align === 'left' ? X - ink.left : b.align === 'right' ? X - ink.right : X - (ink.left + ink.right) / 2
+          els.push({ t: 'text', id: id(), s, x, y: y + it.size * CAP + i * pitch, size: it.size, font: it.font, fill: C[it.tone], anchor: 'start', opacity: it.opacity })
         })
       } else if (it.k === 'logo') {
         const src = logoSrc(doc, it.asset)
@@ -359,13 +366,13 @@ export function renderCover(d: CoverDecl, c: CoverContent, doc: Doc, page = 0): 
             : p.blue ? C.blue : it.mode === 'reverse' ? C.white : C.black
           const [px, py, pw, ph] = p.el.box
           if (p.el.t === 'rect') els.push({ t: 'rect', id: id(), box: [ox + px * k, oy + py * k, pw * k, ph * k], fill })
-          else els.push({ t: 'path', id: id(), ref: p.el.id, tf: [k, ox, oy], box: [ox + px * k, oy + py * k, pw * k, ph * k], fill })
+          else els.push({ t: 'path', id: id(), ref: p.el.id, tf: [k, ox, oy], box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, evenodd: p.el.t === 'path' ? p.el.evenodd : undefined })
         })
       } else {
         const len = ((R - L) / 12) * it.len
         const x = b.align === 'left' ? X : b.align === 'right' ? X - len : X - len / 2
         const lw = it.w ?? 1
-        els.push({ t: 'rect', id: id(), box: [x, y, len, lw], fill: C[it.tone] })
+        els.push({ t: 'rect', id: id(), box: [x, y, len, lw], fill: C[it.tone], opacity: it.opacity })
       }
       y += itemH(it, c, doc) + (it.gap ?? 0)
     }
