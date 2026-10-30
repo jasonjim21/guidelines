@@ -1,0 +1,1163 @@
+{
+ "source": "삼우건기 CI GUIDELINES v1 (2026-10-23, Adobe Illustrator, PDF 호환)",
+ "method": "pdftotext -bbox / pdf.js 글자 크기 / 72dpi 렌더 픽셀 성분 분석. 이미지 파일은 저장소에 넣지 않는다",
+ "artboard": {
+  "w": 1920,
+  "h": 1080,
+  "unit": "pt"
+ },
+ "observed": {
+  "margin": {
+   "left": 100,
+   "right": 100,
+   "top": 98,
+   "bottom": 82
+  },
+  "split": "왼쪽 1/3(100–673) 머리 · 오른쪽 2/3(673–1820) 내용. 673.3 = 100 + 1720/3",
+  "type_sizes": [
+   500,
+   100,
+   72,
+   70,
+   30,
+   27,
+   25,
+   20,
+   18,
+   16,
+   15.2,
+   13.5
+  ],
+  "colors": {
+   "title": "#99b8ef (주조색 40%)",
+   "body": "#222222",
+   "folio": "#a5a5a5",
+   "tile": "#f2f6fd (주조색 5%)",
+   "toc_bg": "#eeeeee",
+   "mega": "#185eda (주조색 + 흰 9%)"
+  }
+ },
+ "pages": [
+  {
+   "page": 1,
+   "type": "cover",
+   "bg": "#004ed8",
+   "layout": "cover-field",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      100,
+      203,
+      608,
+      180
+     ],
+     "size": 70,
+     "lines": 2,
+     "note": "문서 제목, 행간 약 1.2"
+    },
+    {
+     "label": "motif",
+     "box": [
+      704,
+      0,
+      1216,
+      1080
+     ],
+     "bleed": "trbl",
+     "note": "심볼 확대 윤곽선, 톤온톤"
+    },
+    {
+     "label": "logo",
+     "box": [
+      100,
+      904,
+      180,
+      64
+     ],
+     "note": "단색 흰 로고"
+    },
+    {
+     "label": "folio",
+     "box": [
+      100,
+      972,
+      384,
+      26
+     ],
+     "size": 18
+    }
+   ]
+  },
+  {
+   "page": 2,
+   "type": "toc",
+   "bg": "#eeeeee",
+   "layout": "toc-row",
+   "cells": [
+    {
+     "label": "logo",
+     "box": [
+      96,
+      80,
+      176,
+      64
+     ]
+    },
+    {
+     "label": "toc-entry",
+     "box": [
+      984,
+      505,
+      352,
+      56
+     ],
+     "size": 27,
+     "note": "글자 오른쪽 정렬, 아래 2pt 괘선"
+    },
+    {
+     "label": "toc-entry",
+     "box": [
+      1392,
+      505,
+      424,
+      56
+     ],
+     "size": 27
+    }
+   ]
+  },
+  {
+   "page": 3,
+   "type": "divider",
+   "bg": "#004ed8",
+   "layout": "div-mega",
+   "cells": [
+    {
+     "label": "mega",
+     "box": [
+      86,
+      216,
+      1430,
+      816
+     ],
+     "size": 500,
+     "lines": 2,
+     "color": "#185eda",
+     "note": "바탕보다 약 9% 밝은 톤온톤. x=86으로 여백선보다 14 당김(글자 옆 여백 보정)"
+    }
+   ]
+  },
+  {
+   "page": 4,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-hero-right",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      167,
+      98,
+      89,
+      37
+     ],
+     "size": 30,
+     "color": "#99b8ef",
+     "note": "제목 x가 장마다 167–297로 흔들림. 본문은 103.5 고정 → 원래 의도는 여백선(100) 정렬로 보고 옮김"
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      433,
+      94
+     ],
+     "size": 16,
+     "lines": 4,
+     "color": "#222222",
+     "note": "행간 24 (1.5)"
+    },
+    {
+     "label": "logo",
+     "box": [
+      824,
+      384,
+      968,
+      312
+     ],
+     "note": "심볼 단독, 오른쪽 끝 정렬"
+    },
+    {
+     "label": "folio",
+     "box": [
+      100,
+      972,
+      384,
+      26
+     ],
+     "size": 18,
+     "color": "#a5a5a5"
+    }
+   ]
+  },
+  {
+   "page": 5,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-hero-right",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      221,
+      98,
+      111,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      439,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "logo",
+     "box": [
+      784,
+      408,
+      960,
+      264
+     ],
+     "note": "로고타입"
+    }
+   ]
+  },
+  {
+   "page": 6,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-hero-right",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      221,
+      98,
+      118,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      429,
+      94
+     ],
+     "size": 16,
+     "lines": 4
+    },
+    {
+     "label": "logo",
+     "box": [
+      616,
+      456,
+      1136,
+      168
+     ],
+     "note": "가로형 시그니처"
+    }
+   ]
+  },
+  {
+   "page": 7,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-hero-center",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      221,
+      98,
+      118,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      429,
+      94
+     ],
+     "size": 16,
+     "lines": 4
+    },
+    {
+     "label": "logo",
+     "box": [
+      864,
+      312,
+      848,
+      456
+     ],
+     "note": "세로형 시그니처, 본문 영역 가운데"
+    }
+   ]
+  },
+  {
+   "page": 8,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-list",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      221,
+      98,
+      186,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      412,
+      94
+     ],
+     "size": 16,
+     "lines": 4
+    },
+    {
+     "label": "logo",
+     "box": [
+      1000,
+      224,
+      616,
+      288
+     ],
+     "note": "여백 규정 표시(X) 포함"
+    },
+    {
+     "label": "logo",
+     "box": [
+      936,
+      632,
+      744,
+      192
+     ]
+    }
+   ]
+  },
+  {
+   "page": 9,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-list",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      296,
+      98,
+      154,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      408,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "logo",
+     "box": [
+      872,
+      360,
+      504,
+      128
+     ],
+     "note": "오른쪽 끝 x=1376 정렬"
+    },
+    {
+     "label": "caption",
+     "box": [
+      1430,
+      407,
+      206,
+      72
+     ],
+     "size": 25,
+     "lines": 2
+    },
+    {
+     "label": "logo",
+     "box": [
+      1136,
+      600,
+      240,
+      120
+     ]
+    },
+    {
+     "label": "caption",
+     "box": [
+      1430,
+      652,
+      202,
+      72
+     ],
+     "size": 25,
+     "lines": 2
+    }
+   ]
+  },
+  {
+   "page": 10,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-bands",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      229,
+      98,
+      164,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      408,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "chip",
+     "box": [
+      673,
+      192,
+      1147,
+      381
+     ],
+     "note": "주조색 띠 — 다른 띠의 약 2배"
+    },
+    {
+     "label": "chip",
+     "box": [
+      673,
+      573,
+      1147,
+      177
+     ]
+    },
+    {
+     "label": "chip",
+     "box": [
+      673,
+      750,
+      1147,
+      174
+     ]
+    },
+    {
+     "label": "caption",
+     "box": [
+      1349,
+      215,
+      364,
+      117
+     ],
+     "size": 15.2,
+     "note": "Pantone·RGB·CMYK·HEX 4열, 띠 오른쪽 위"
+    },
+    {
+     "label": "caption",
+     "box": [
+      701,
+      451,
+      531,
+      124
+     ],
+     "size": 100,
+     "note": "색 이름, 띠 왼쪽 아래"
+    }
+   ]
+  },
+  {
+   "page": 11,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": null,
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      229,
+      98,
+      206,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      398,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "caption",
+     "box": [
+      785,
+      148,
+      905,
+      29
+     ],
+     "size": 20,
+     "note": "열 머리: Signature·White·Black·Yellow·Blue"
+    },
+    {
+     "label": "logo",
+     "box": [
+      673,
+      184,
+      1147,
+      744
+     ],
+     "note": "4행 × 5열 바탕별 로고 행렬. 아직 선언 없음(행렬 배열 필요)"
+    }
+   ]
+  },
+  {
+   "page": 12,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-panels",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      261,
+      98,
+      228,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      395,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "caption",
+     "box": [
+      673,
+      153,
+      127,
+      28
+     ],
+     "size": 20
+    },
+    {
+     "label": "image",
+     "box": [
+      673,
+      205,
+      1147,
+      330
+     ],
+     "note": "농도 단계 판"
+    },
+    {
+     "label": "caption",
+     "box": [
+      673,
+      559,
+      41,
+      28
+     ],
+     "size": 20
+    },
+    {
+     "label": "image",
+     "box": [
+      673,
+      612,
+      1147,
+      345
+     ]
+    }
+   ]
+  },
+  {
+   "page": 13,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-grid-3",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      297,
+      98,
+      195,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      341,
+      94
+     ],
+     "size": 16,
+     "lines": 4
+    },
+    {
+     "label": "caption",
+     "box": [
+      673,
+      161,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      1063,
+      161,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      1453,
+      161,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      673,
+      427,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      1063,
+      427,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      1453,
+      427,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      673,
+      693,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      1063,
+      693,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "caption",
+     "box": [
+      1453,
+      693,
+      180,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "logo",
+     "box": [
+      673,
+      189,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      1063,
+      189,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      1453,
+      189,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      673,
+      455,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      1063,
+      455,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      1453,
+      455,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      673,
+      721,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      1063,
+      721,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    },
+    {
+     "label": "logo",
+     "box": [
+      1453,
+      721,
+      367,
+      216
+     ],
+     "note": "타일 바탕 #f2f6fd"
+    }
+   ]
+  },
+  {
+   "page": 14,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-specimen",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      224,
+      98,
+      204,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      462,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "caption",
+     "box": [
+      860,
+      200,
+      141,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "specimen",
+     "box": [
+      860,
+      240,
+      780,
+      220
+     ],
+     "note": "제목 서체 견본 3굵기 (이사만루체 — 시스템에 없어 렌더 안 됨)"
+    },
+    {
+     "label": "caption",
+     "box": [
+      861,
+      553,
+      152,
+      22
+     ],
+     "size": 16
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      603,
+      485,
+      58
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      690,
+      485,
+      58
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      777,
+      485,
+      58
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      864,
+      485,
+      58
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "caption",
+     "box": [
+      1670,
+      620,
+      80,
+      23
+     ],
+     "size": 16,
+     "note": "굵기 이름"
+    },
+    {
+     "label": "caption",
+     "box": [
+      1670,
+      707,
+      80,
+      23
+     ],
+     "size": 16,
+     "note": "굵기 이름"
+    },
+    {
+     "label": "caption",
+     "box": [
+      1670,
+      794,
+      80,
+      23
+     ],
+     "size": 16,
+     "note": "굵기 이름"
+    },
+    {
+     "label": "caption",
+     "box": [
+      1670,
+      881,
+      80,
+      23
+     ],
+     "size": 16,
+     "note": "굵기 이름"
+    }
+   ]
+  },
+  {
+   "page": 15,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-specimen",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      224,
+      98,
+      206,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      468,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "specimen",
+     "box": [
+      860,
+      243,
+      749,
+      164
+     ],
+     "size": 72,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      603,
+      659,
+      55
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      691,
+      659,
+      55
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      779,
+      659,
+      55
+     ],
+     "size": 20,
+     "lines": 2
+    },
+    {
+     "label": "specimen",
+     "box": [
+      864,
+      867,
+      659,
+      55
+     ],
+     "size": 20,
+     "lines": 2
+    }
+   ]
+  },
+  {
+   "page": 16,
+   "type": "content",
+   "bg": "#ffffff",
+   "layout": "c-grid-2",
+   "cells": [
+    {
+     "label": "title",
+     "box": [
+      290,
+      98,
+      181,
+      37
+     ],
+     "size": 30
+    },
+    {
+     "label": "body",
+     "box": [
+      103.5,
+      159,
+      358,
+      70
+     ],
+     "size": 16,
+     "lines": 3
+    },
+    {
+     "label": "image",
+     "box": [
+      672,
+      195,
+      568,
+      354
+     ]
+    },
+    {
+     "label": "image",
+     "box": [
+      1248,
+      195,
+      576,
+      354
+     ]
+    },
+    {
+     "label": "image",
+     "box": [
+      672,
+      567,
+      568,
+      354
+     ]
+    },
+    {
+     "label": "image",
+     "box": [
+      1248,
+      567,
+      576,
+      354
+     ]
+    }
+   ]
+  },
+  {
+   "page": 17,
+   "type": "divider",
+   "bg": "#004ed8",
+   "layout": "div-mega",
+   "cells": [
+    {
+     "label": "mega",
+     "box": [
+      86,
+      216,
+      1955,
+      816
+     ],
+     "size": 500,
+     "lines": 2,
+     "note": "APPLICATION — 오른쪽 재단선 밖으로 잘림(의도)"
+    }
+   ]
+  }
+ ]
+}
