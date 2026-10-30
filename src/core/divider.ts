@@ -113,21 +113,18 @@ export const dividerDecls = (c: Content): PageDecl[] => [
     ],
   },
   {
-    id: 'd08', name: '반 나눔', note: '쪽을 반으로 나눠 왼쪽은 파랑 면에 영문 장 제목을 크게 아래로, 오른쪽 흰 면에 국문 장 제목을 오른쪽 아래',
+    id: 'd08', name: '반 나눔', note: '쪽을 반으로 나눠 왼쪽은 파랑 면에 영문 장 제목을 크게 아래로, 오른쪽 흰 면은 로고만 두고 비운다',
     bg: 'white',
     fields: [{ x0: 'edge', x1: 6, y0: 'edge', y1: 'edge', tone: 'blue' }],
     blocks: [
       { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
         { k: 'text', part: 'en0', size: 220, font: 'Prohibition-Regular', tone: 'light', lead: 0.88 },
       ] },
-      { x: 12, y: 8, align: 'right', valign: 'bottom', items: [
-        { k: 'text', part: 'kr0', size: 72, font: 'esamanruOTFMedium', tone: 'black' },
-      ] },
       { x: 12, y: 0, align: 'right', valign: 'top', items: [{ k: 'logo', asset: 'small', h: 50, mode: 'color' }] },
     ],
   },
   {
-    id: 'd09', name: '국문 크게', note: '흰 바탕. 국문 장 제목을 브랜드명 서체로 가장 크게 왼쪽 아래에, 머리표와 영문은 왼쪽 위에 한 줄로',
+    id: 'd09', name: '머리표 한 줄', note: '흰 바탕 왼쪽 위에 머리표 A.와 영문 장 제목만 한 줄로. 나머지는 비운다',
     bg: 'white',
     blocks: [
       { x: 0, y: 0, align: 'left', valign: 'top', items: [
@@ -135,9 +132,6 @@ export const dividerDecls = (c: Content): PageDecl[] => [
           { s: c.ab0[0], dx: 0, size: 48, font: 'Prohibition-Regular', tone: 'blue' },
           { s: c.enl0[0], dx: 16, flow: true, size: 48, font: 'Prohibition-Regular', tone: 'black' },
         ] },
-      ] },
-      { x: 0, y: 8, align: 'left', valign: 'bottom', items: [
-        { k: 'text', part: 'kr0', size: 280, font: 'esamanruOTFMedium', tone: 'black' },
       ] },
     ],
   },

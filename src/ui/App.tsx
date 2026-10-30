@@ -7,6 +7,7 @@ import { renderPage, type Content, type PageDecl } from '../core/blocks'
 import { BASE, COVERS, coverContent } from '../core/cover'
 import { tocContent, tocDecls, tocText } from '../core/toc'
 import { DIVIDER_BASE, dividerDecls } from '../core/divider'
+import { contentDecls, contentPageText } from '../core/content'
 
 const DOC = raw as unknown as Doc
 
@@ -15,8 +16,9 @@ const local = import.meta.glob('../../references/local/samwoo-ci-v1.assets.json'
 const ASSETS: Assets = (Object.values(local)[0] as Assets | undefined) ?? {}
 
 const TOC = tocContent(DOC)
-const CONTENT: Content = { ...coverContent(DOC), ...tocText(TOC) }
+const CONTENT: Content = { ...coverContent(DOC), ...tocText(TOC), ...contentPageText(DOC, 4) }
 const TOC_DECLS = tocDecls(TOC)
+const CONTENT_DECLS = contentDecls(CONTENT)
 
 /** 정렬을 획 끝으로 맞추려면 실제 서체로 재야 한다 — 서체를 받은 뒤 한 번 더 그린다 */
 const FACES = [800, 700, 600, 500, 400, 300].map((w) => `${w} 40px "Pretendard Variable"`)
@@ -46,11 +48,12 @@ function Section({ title, sub, decls }: { title: string; sub: string; decls: { d
   )
 }
 
-type Tab = 'cover' | 'toc' | 'divider'
+type Tab = 'cover' | 'toc' | 'divider' | 'content'
 const TABS: { id: Tab; label: string; ready: boolean }[] = [
   { id: 'cover', label: '표지', ready: true },
   { id: 'toc', label: '목차', ready: true },
   { id: 'divider', label: '간지', ready: true },
+  { id: 'content', label: '내지', ready: true },
 ]
 const readHash = (): Tab => {
   try {
@@ -91,6 +94,13 @@ export default function App() {
             title="표지 변주 10"
             sub="원본 표지를 기본형으로 · 01–05 로고를 크게, 06–10 글로 짜기 · 영문 제목 대문자 · 배경 그래픽 없음 · 자간 −2% · 장평 100%"
             decls={[{ d: BASE, label: '기준' }, ...COVERS.map((d, i) => ({ d, label: num(i + 1) }))]}
+          />
+        )}
+        {tab === 'content' && (
+          <Section
+            title="내지 변주 5"
+            sub="원본 심볼 장을 기본형으로 · 제목·설명·개체·하단 캡션(폴리오) 위치와 개체 뒤 상자만 바꿈 · 원본 줄바꿈 그대로 · 자간 −2% · 장평 100%"
+            decls={[{ d: CONTENT_DECLS.base, label: '기준' }, ...CONTENT_DECLS.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
           />
         )}
         {tab === 'divider' && (

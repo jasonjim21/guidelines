@@ -30,6 +30,7 @@ export const C = {
   ink: '#222222', // 원본 본문 글색
   gray: '#eeeeee', // 원본 목차 바탕
   mute: '#a4a4a4', // 원본 폴리오 글색
+  tint: '#f2f6fd', // 원본 사용 위반 장의 타일 바탕 (주조색 5%)
 } as const
 export type Tone = keyof typeof C
 
