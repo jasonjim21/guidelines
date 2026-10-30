@@ -142,7 +142,7 @@ export default function App() {
             />
           )
         })}
-        {tab === 'content' && PAGE_CONTENT.filter((p) => p.asset === 'symbol').map((p) => {
+        {tab === 'content' && PAGE_CONTENT.map((p) => {
           const decls = contentDecls(p.content, DOC, p.asset)
           return (
             <Section
