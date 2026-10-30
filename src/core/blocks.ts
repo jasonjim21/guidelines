@@ -65,7 +65,7 @@ export type Item =
    * 원본에서 빌린 로고. 크기는 높이(h) 또는 단 수(cols)로.
    * mode: color = 원본 2색(파랑+검정), reverse = 검정 부분만 흰색(어두운 바탕), mono = 한 색
    */
-  | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; gap?: number }
+  | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; opacity?: number; gap?: number }
   /** 가로 괘선. len은 단 수 */
   | { k: 'rule'; len: number; tone: Tone; w?: number; opacity?: number; gap?: number }
 
@@ -208,8 +208,8 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
           const fill = it.mode === 'mono' ? C[it.tone ?? 'light']
             : p.blue ? C.blue : it.mode === 'reverse' ? C.white : C.black
           const [px, py, pw, ph] = p.el.box
-          if (p.el.t === 'rect') els.push({ t: 'rect', id: id(), box: [ox + px * k, oy + py * k, pw * k, ph * k], fill })
-          else els.push({ t: 'path', id: id(), ref: p.el.id, tf: [k, ox, oy], box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, evenodd: p.el.t === 'path' ? p.el.evenodd : undefined })
+          if (p.el.t === 'rect') els.push({ t: 'rect', id: id(), box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, opacity: it.opacity })
+          else els.push({ t: 'path', id: id(), ref: p.el.id, tf: [k, ox, oy], box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, opacity: it.opacity, evenodd: p.el.t === 'path' ? p.el.evenodd : undefined })
         })
       } else {
         const len = ((R - L) / 12) * it.len

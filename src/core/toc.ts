@@ -383,6 +383,8 @@ export function tocText(sec: TocSection[]): Record<string, string[]> {
     out[`en${i}`] = s.en.split(/\s+/)
     out[`enl${i}`] = [s.en]
     out[`n${i}`] = [no(i)]
+    /** 장 표지용 머리표 — 번호 대신 A. B. */
+    out[`ab${i}`] = [`${String.fromCharCode(65 + i)}.`]
     s.items.forEach((it, k) => {
       out[`s${i}i${k}no`] = [no(k)]
       out[`s${i}i${k}kr`] = [it.kr]

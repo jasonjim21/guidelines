@@ -6,7 +6,7 @@ import { PageSvg } from '../core/render'
 import { renderPage, type Content, type PageDecl } from '../core/blocks'
 import { BASE, COVERS, coverContent } from '../core/cover'
 import { tocContent, tocDecls, tocText } from '../core/toc'
-import { DIVIDERS, DIVIDER_BASE, dividerPages } from '../core/divider'
+import { DIVIDER_BASE, dividerDecls } from '../core/divider'
 
 const DOC = raw as unknown as Doc
 
@@ -95,10 +95,9 @@ export default function App() {
         )}
         {tab === 'divider' && (
           <Section
-            title="간지 변주 4"
-            sub="원본 간지를 기본형으로 · 한 선언을 기본 시스템·응용 시스템 두 장에 그려 제목 길이가 달라도 보는지 확인 · 자간 −2% · 장평 100%"
-            decls={[DIVIDER_BASE, ...DIVIDERS].flatMap((d, i) =>
-              dividerPages(d, TOC).map((p, si) => ({ d: p, label: `${i === 0 ? '기준' : num(i)} · ${TOC[si].kr}` })))}
+            title="간지 변주 10"
+            sub="원본 간지를 기본형으로 · 기본 시스템 한 장으로만 · 항목 목록·장 번호 없이 (머리표가 필요하면 A.) · 자간 −2% · 장평 100%"
+            decls={[{ d: DIVIDER_BASE, label: '기준' }, ...dividerDecls(CONTENT).map((d, i) => ({ d, label: num(i + 1) }))]}
           />
         )}
         {tab === 'toc' && (
