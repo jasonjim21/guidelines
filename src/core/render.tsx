@@ -28,15 +28,17 @@ function ElNode({ el, assets, fonts, cid, pid, track }: { el: El; assets: Assets
       return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={el.stroke} strokeWidth={el.sw} {...common} />
     }
     case 'path': {
-      const d = assets[el.ref ?? el.id]
+      const d = el.d ?? assets[el.ref ?? el.id]
       if (!d) {
         const [x, y, w, h] = el.box
         return <rect x={x} y={y} width={w} height={h} fill={el.fill ? el.fill : 'none'} fillOpacity={el.fill ? 0.25 : undefined} stroke={el.stroke ?? el.fill} strokeWidth={1} {...common} />
       }
-      return (
+      const shape = (
         <path d={d} transform={el.tf ? `translate(${el.tf[1]} ${el.tf[2]}) scale(${el.tf[0]})` : undefined} fill={el.fill ?? 'none'} fillOpacity={el.fillOpacity} fillRule={el.evenodd ? 'evenodd' : 'nonzero'}
-          stroke={el.stroke} strokeWidth={el.stroke ? el.sw : undefined} strokeMiterlimit={10} {...common} />
+          stroke={el.stroke} strokeWidth={el.stroke ? el.sw : undefined} strokeMiterlimit={10} {...(el.tf ? { opacity: el.opacity } : common)} />
       )
+      // 옮긴 모양(tf)의 잘라내기는 쪽 좌표 그대로여야 하므로 바깥 묶음에 건다 (path에 걸면 변환된 좌표로 잘린다)
+      return el.tf && common.clipPath ? <g clipPath={common.clipPath}>{shape}</g> : shape
     }
     case 'image': {
       const [x, y, w, h] = el.box

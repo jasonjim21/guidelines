@@ -8,6 +8,7 @@ import { BASE, COVERS, coverContent } from '../core/cover'
 import { tocContent, tocDecls, tocText } from '../core/toc'
 import { DIVIDER_BASE, dividerDecls, dividerDevelop } from '../core/divider'
 import { CONTENT_PAGES, contentDecls, contentPageText } from '../core/content'
+import { APP_ITEMS, appContent, appDecl } from '../core/application'
 
 const DOC = raw as unknown as Doc
 
@@ -49,12 +50,13 @@ function Section({ title, sub, decls, content = CONTENT }: { title: string; sub:
   )
 }
 
-type Tab = 'cover' | 'toc' | 'divider' | 'content'
+type Tab = 'cover' | 'toc' | 'divider' | 'content' | 'application'
 const TABS: { id: Tab; label: string; ready: boolean }[] = [
   { id: 'cover', label: '표지', ready: true },
   { id: 'toc', label: '목차', ready: true },
   { id: 'divider', label: '간지', ready: true },
   { id: 'content', label: '내지', ready: true },
+  { id: 'application', label: '응용 시스템', ready: true },
 ]
 const readHash = (): Tab => {
   try {
@@ -109,6 +111,18 @@ export default function App() {
             decls={[{ d: BASE, label: '기준' }, ...COVERS.map((d, i) => ({ d, label: num(i + 1) }))]}
           />
         )}
+        {tab === 'application' && APP_ITEMS.map((it, i) => {
+          const c = { ...CONTENT, ...appContent(it, CONTENT.folio) }
+          return (
+            <Section
+              key={it.mock}
+              title={`${String(i + 1).padStart(2, '0')} ${it.kr} ${it.en}`}
+              sub="원본 내지 기준형에 본문 초안과 평면 목업(통용 규격). 목업 속 글은 회색 막대 자리표시"
+              content={c}
+              decls={[{ d: appDecl(it, c), label: it.kr }]}
+            />
+          )
+        })}
         {tab === 'content' && PAGE_CONTENT.map((p) => {
           const decls = contentDecls(p.content, DOC, p.asset)
           return (

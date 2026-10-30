@@ -1,6 +1,7 @@
 import type { Doc, DocPage, El } from './doc'
 import { faceOf, type FontSet } from './fonts'
 import { inkBounds } from './ink'
+import { drawMock, mockSize, type MockKind } from './mockup'
 
 /**
  * 장표 블록 엔진 — 표지·목차 변주가 같이 쓴다.
@@ -67,6 +68,8 @@ export type Item =
    * mode: color = 원본 2색(파랑+검정), reverse = 검정 부분만 흰색(어두운 바탕), mono = 한 색
    */
   | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; opacity?: number; gap?: number }
+  /** 평면 목업 (명함·봉투·쇼핑백·티셔츠). 실제 규격 비율로 그려 단 수·높이 상자 안에 맞춘다. 아래에 규격 설명이 붙는다 */
+  | { k: 'mock'; kind: MockKind; cols: number; h: number; gap?: number }
   /** 가로 괘선. len은 단 수 */
   | { k: 'rule'; len: number; tone: Tone; w?: number; opacity?: number; gap?: number }
 
@@ -113,6 +116,23 @@ interface LogoPart { el: Extract<El, { t: 'path' | 'rect' }>; blue: boolean }
 interface LogoSrc { box: [number, number, number, number]; parts: LogoPart[] }
 
 const logoCache = new Map<string, LogoSrc>()
+/** 원본 로고를 (x, y) 왼쪽 위·높이 h로 옮겨 놓는다 — 블록 엔진과 목업이 같이 쓴다 */
+export function placeLogo(
+  els: El[], id: () => string, doc: Doc, asset: LogoAsset, x: number, y: number, h: number,
+  mode: 'color' | 'reverse' | 'mono', tone?: Tone, opacity?: number,
+): number {
+  const src = logoSrc(doc, asset)
+  const k = h / src.box[3]
+  const ox = x - src.box[0] * k, oy = y - src.box[1] * k
+  src.parts.forEach((p) => {
+    const fill = mode === 'mono' ? C[tone ?? 'light'] : p.blue ? C.blue : mode === 'reverse' ? C.white : C.black
+    const [px, py, pw, ph] = p.el.box
+    if (p.el.t === 'rect') els.push({ t: 'rect', id: id(), box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, opacity })
+    else els.push({ t: 'path', id: id(), ref: p.el.id, tf: [k, ox, oy], box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, opacity, evenodd: p.el.evenodd })
+  })
+  return src.box[2] * k
+}
+
 export function logoSrc(doc: Doc, a: LogoAsset): LogoSrc {
   const hit = logoCache.get(a)
   if (hit) return hit
@@ -148,6 +168,7 @@ function itemH(it: Item, c: Content, doc: Doc): number {
   if (it.k === 'space') return it.h
   if (it.k === 'row') return Math.max(...it.cells.map((x) => x.size)) * CAP
   if (it.k === 'rule') return it.w ?? 1
+  if (it.k === 'mock') return mockSize(it.kind, ((R - L) / 12) * it.cols, it.h).h
   const n = lines(it.part, c).length
   return it.size * CAP + (n - 1) * it.size * (it.lead ?? 1.2)
 }
@@ -202,18 +223,13 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
       } else if (it.k === 'space') {
         // 간격만
       } else if (it.k === 'logo') {
-        const src = logoSrc(doc, it.asset)
         const { w, h } = logoSize(doc, it)
         const x = b.align === 'left' ? X : b.align === 'right' ? X - w : X - w / 2
-        const k = h / src.box[3]
-        const ox = x - src.box[0] * k, oy = y - src.box[1] * k
-        src.parts.forEach((p) => {
-          const fill = it.mode === 'mono' ? C[it.tone ?? 'light']
-            : p.blue ? C.blue : it.mode === 'reverse' ? C.white : C.black
-          const [px, py, pw, ph] = p.el.box
-          if (p.el.t === 'rect') els.push({ t: 'rect', id: id(), box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, opacity: it.opacity })
-          else els.push({ t: 'path', id: id(), ref: p.el.id, tf: [k, ox, oy], box: [ox + px * k, oy + py * k, pw * k, ph * k], fill, opacity: it.opacity, evenodd: p.el.t === 'path' ? p.el.evenodd : undefined })
-        })
+        placeLogo(els, id, doc, it.asset, x, y, h, it.mode, it.tone, it.opacity)
+      } else if (it.k === 'mock') {
+        const { w } = mockSize(it.kind, ((R - L) / 12) * it.cols, it.h)
+        const x = b.align === 'left' ? X : b.align === 'right' ? X - w : X - w / 2
+        els.push(...drawMock(it.kind, x, y, ((R - L) / 12) * it.cols, it.h, { doc, id, fonts }))
       } else {
         const len = ((R - L) / 12) * it.len
         const x = b.align === 'left' ? X : b.align === 'right' ? X - len : X - len / 2

@@ -21,6 +21,8 @@ export type El =
       t: 'path'; box: Box; fill?: string; fillOpacity?: number; stroke?: string; sw?: number; evenodd?: boolean; dash?: string
       /** 다른 요소의 모양을 빌려 쓴다 (assets 키). 없으면 자기 id */
       ref?: string
+      /** 이 저장소에서 직접 그린 모양 (목업 윤곽처럼 원본에 없는 것) */
+      d?: string
       /** 빌린 모양을 옮기고 키운다: [배율, x 이동, y 이동] */
       tf?: [number, number, number]
     })

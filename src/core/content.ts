@@ -27,15 +27,15 @@ export function contentPageText(doc: Doc, pageNo: number): Content {
 }
 
 /** 원본 쪽 제목 — 국문(이사만루) 뒤에 영문(Prohibition, 40%)을 잇는다 */
-const title = (c: Content, tone: 'blue' | 'light' = 'blue', gap = 36): Item => ({
+export const title = (c: Content, tone: 'blue' | 'light' = 'blue', gap = 36): Item => ({
   k: 'row', gap, cells: [
     { s: c.pkr[0], dx: 0, size: 30, font: 'esamanruOTFMedium', tone },
     { s: c.pen[0], dx: 11, flow: true, size: 30, font: 'Prohibition-Regular', tone, opacity: 0.4 },
   ],
 })
-const body = (lead = 1.5, tone: 'ink' | 'light' = 'ink'): Item => ({ k: 'text', part: 'body', size: 16, font: 'Pretendard-Regular', tone, lead })
+export const body = (lead = 1.5, tone: 'ink' | 'light' = 'ink'): Item => ({ k: 'text', part: 'body', size: 16, font: 'Pretendard-Regular', tone, lead })
 const folio = (tone: 'mute' | 'light' = 'mute'): Item => ({ k: 'text', part: 'folio', size: 18, font: 'Inter-Regular', tone, opacity: tone === 'light' ? 0.6 : undefined })
-const folioAt = (x: number, align: Block['align'], tone: 'mute' | 'light' = 'mute'): Block => ({ x, y: 8, align, valign: 'bottom', items: [folio(tone)] })
+export const folioAt = (x: number, align: Block['align'], tone: 'mute' | 'light' = 'mute'): Block => ({ x, y: 8, align, valign: 'bottom', items: [folio(tone)] })
 
 export function contentDecls(c: Content, doc: Doc, asset: LogoAsset): { base: PageDecl; variants: PageDecl[] } {
   // 기준형의 개체는 원본 쪽에 놓인 자리 그대로 (오른쪽 끝·세로 가운데·높이)
