@@ -2,6 +2,7 @@ import type { Box, Doc, DocPage, El, GroupEl } from './doc'
 import type { FontSet } from './fonts'
 import { colX, rowY, renderPage, type Block, type Content, type PageDecl } from './blocks'
 import { body, folio, folioAt, title } from './content'
+import { figureLayouts } from './figures'
 
 /**
  * 색상 체계(10쪽)·색상 규정(11쪽)·회색도(12쪽) 전용 레이아웃 — 쪽마다 4개.
@@ -404,7 +405,7 @@ export function specialLayouts(doc: Doc, page: number): Special[] {
   if (page === 10) return colorLayouts(colorSystem(doc))
   if (page === 11) return regulationLayouts(colorRegulation(doc))
   if (page === 12) return grayLayouts(grayscale(doc))
-  return []
+  return figureLayouts(doc, page)
 }
 
 /** 머리(제목·설명)와 폴리오는 블록 엔진으로, 나머지는 전용 그리기로 */

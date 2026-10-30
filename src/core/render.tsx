@@ -21,11 +21,15 @@ function ElNode({ el, assets, fonts, cid, pid, track }: { el: El; assets: Assets
   switch (el.t) {
     case 'group':
       // 안쪽 잘라내기는 원본 좌표로 정의돼 있다 — transform 안에서 쓰면 같이 옮겨진다
-      return (
-        <g transform={`translate(${el.tf[1]} ${el.tf[2]}) scale(${el.tf[0]})`} opacity={el.opacity}>
-          {el.els.map((c) => <ElNode key={c.id} el={c} assets={assets} fonts={fonts} cid={cid} pid={pid} track={track} />)}
-        </g>
-      )
+      {
+        const g = (
+          <g transform={`translate(${el.tf[1]} ${el.tf[2]}) scale(${el.tf[0]})`} opacity={el.opacity}>
+            {el.els.map((c) => <ElNode key={c.id} el={c} assets={assets} fonts={fonts} cid={cid} pid={pid} track={track} />)}
+          </g>
+        )
+        // 묶음을 틀에 맞춰 잘라 쓸 때(cover) — 잘라내기는 쪽 좌표라 바깥에 건다
+        return el.clip ? <g clipPath={common.clipPath}>{g}</g> : g
+      }
     case 'rect': {
       const [x, y, w, h] = el.box
       return <rect x={x} y={y} width={w} height={h} fill={el.fill ?? 'none'} fillOpacity={el.fillOpacity} {...common} />
