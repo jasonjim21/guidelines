@@ -134,13 +134,15 @@ export default function App() {
         )}
         {tab === 'application' && APP_ITEMS.map((it, i) => {
           const c = { ...CONTENT, ...appContent(it, CONTENT.folio) }
+          // 내지와 같은 4장(기준·02·03·05), 개체 자리에 평면 목업
+          const v = contentDecls(c, DOC, null, 0, it.mock).variants
           return (
             <Section
               key={it.mock}
               title={`${String(i + 1).padStart(2, '0')} ${it.kr} ${it.en}`}
-              sub="원본 내지 기준형에 본문 초안과 평면 목업(통용 규격). 목업 속 글은 회색 막대 자리표시"
+              sub="내지와 같은 4장(기준·02·03·05)에 본문 초안과 평면 목업(통용 규격) · 목업 속 글은 회색 막대 자리표시"
               content={c}
-              decls={[{ d: appDecl(it, c), label: it.kr }]}
+              decls={[{ d: appDecl(it, c), label: '기준' }, ...v.map((d) => ({ d, label: d.id.slice(1) }))]}
             />
           )
         })}
