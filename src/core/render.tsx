@@ -2,6 +2,8 @@ import type { Assets, DocPage, El } from './doc'
 import { faceOf, type FontSet } from './fonts'
 
 /**
+ * 장평은 언제나 100%. 글자 폭을 늘이거나 줄이지 않는다 (textLength·scaleX 금지).
+ *
  * 좌표 원자료 → SVG. 유일한 렌더러다. 화면 미리보기와 PDF 출력이 이 컴포넌트 하나를 쓴다.
  * 두 번째 렌더러를 만들지 말 것.
  */
@@ -46,11 +48,9 @@ function ElNode({ el, assets, fonts, cid, pid }: { el: El; assets: Assets; fonts
     case 'text': {
       const f = faceOf(fonts, el.font)
       const s = f.upper ? el.s.toUpperCase() : el.s
-      const fit = f.fit && el.w
       return (
         <text x={el.x} y={el.y} fontFamily={f.family} fontSize={el.size} fontWeight={f.weight} fill={el.fill}
           letterSpacing={TRACK * el.size} textAnchor={el.anchor}
-          textLength={fit ? el.w : undefined} lengthAdjust={fit ? 'spacingAndGlyphs' : undefined}
           xmlSpace="preserve" {...common}>{s}</text>
       )
     }

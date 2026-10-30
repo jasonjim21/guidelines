@@ -18,14 +18,14 @@ export default function App() {
     <div className="gle">
       <header className="gle-bar">
         <h1>표지 변주 10</h1>
-        <p>원본 표지를 기본형으로 글의 위치·표현·레이아웃·정렬을 바꿈 · 배경 그래픽 없음 · 모든 글 자간 −2% · 여백 100, 12단 × 8행</p>
+        <p>원본 표지를 기본형으로 · 01–05 로고를 크게, 06–10 글로 짜기 · 배경 그래픽 없음 · 자간 −2% · 장평 100% · 여백 100, 12단 × 8행</p>
       </header>
 
       <section className="gle-section">
         <div className="gle-grid">
           {[BASE, ...COVERS].map((d, i) => (
             <figure key={d.id} className="gle-page">
-              <PageSvg page={renderCover(d, CONTENT, i)} assets={ASSETS} fonts={fonts} />
+              <PageSvg page={renderCover(d, CONTENT, DOC, i)} assets={ASSETS} fonts={fonts} />
               <figcaption>
                 <span className="gle-num">{d.id === BASE.id ? '기준' : String(i).padStart(2, '0')}</span>
                 <strong>{d.name}</strong>
@@ -36,17 +36,6 @@ export default function App() {
         </div>
       </section>
 
-      <section className="gle-section">
-        <h2>원본 재현 {DOC.pages.length}장</h2>
-        <div className="gle-grid">
-          {DOC.pages.map((p) => (
-            <figure key={p.page} className="gle-page">
-              <PageSvg page={p} assets={ASSETS} fonts={fonts} />
-              <figcaption><span className="gle-num">{String(p.page).padStart(2, '0')}</span></figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
     </div>
   )
 }

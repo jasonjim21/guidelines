@@ -27,7 +27,7 @@ export type El =
   | (Base & { t: 'image'; box: Box })
   | (Base & {
       t: 'text'; s: string; x: number; y: number; size: number; font: string; fill: string
-      /** 원본 줄 폭. 있으면 대체 서체를 이 폭에 맞춘다 (원본 재현용) */
+      /** 원본 줄 폭 (참고값 — 글자를 이 폭에 맞춰 늘이지 않는다) */
       w?: number
       anchor?: 'start' | 'middle' | 'end'
     })
