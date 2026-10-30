@@ -60,7 +60,7 @@ export function contentDecls(c: Content, doc: Doc, asset: LogoAsset): { base: Pa
       fields: [{ x0: 'edge', x1: 3.6, y0: 'edge', y1: 'edge', tone: 'gray' }],
       blocks: [
         { x: 0, y: 0, align: 'left', valign: 'top', items: [title(c), body(1.6)] },
-        { x: 7.8, y: 4, align: 'center', valign: 'middle', items: [{ k: 'logo', asset, cols: 6.5, h: 460, mode: 'color' }] },
+        { x: 7.8, y: 4, align: 'center', valign: 'middle', items: [{ k: 'logo', asset, cols: 6, h: 420, area: 200000, mode: 'color' }] },
         folioAt(12, 'right'),
       ],
     },
@@ -68,7 +68,7 @@ export function contentDecls(c: Content, doc: Doc, asset: LogoAsset): { base: Pa
       id: 'p03', name: '개체 왼쪽 · 글 오른쪽', note: '원본을 좌우로 뒤집음. 개체는 왼쪽 7단 세로 가운데, 제목·설명은 8단 선에서 시작해 바닥으로. 폴리오는 왼쪽 아래',
       bg: 'white',
       blocks: [
-        { x: 0, y: 3.6, align: 'left', valign: 'middle', items: [{ k: 'logo', asset, cols: 6.5, h: 560, mode: 'color' }] },
+        { x: 0, y: 3.6, align: 'left', valign: 'middle', items: [{ k: 'logo', asset, cols: 6.5, h: 480, area: 230000, mode: 'color' }] },
         { x: 8, y: 7.3, align: 'left', valign: 'bottom', items: [title(c), body(1.6)] },
         folioAt(0, 'left'),
       ],
@@ -77,7 +77,7 @@ export function contentDecls(c: Content, doc: Doc, asset: LogoAsset): { base: Pa
       id: 'p05', name: '개체 위 · 글 아래', note: '개체를 위쪽 가운데에 크게. 제목은 원래 폴리오 자리(왼쪽 아래 바닥선), 설명은 제목 끝에서 100px 띄워 6단 폭으로 같은 바닥선에. 폴리오는 오른쪽 아래',
       bg: 'white',
       blocks: [
-        { x: 6, y: 2.9, pageCenter: true, align: 'center', valign: 'middle', items: [{ k: 'logo', asset, cols: 10, h: 380, mode: 'color' }] },
+        { x: 6, y: 3.2, pageCenter: true, align: 'center', valign: 'middle', items: [{ k: 'logo', asset, cols: 9, h: 330, area: 250000, mode: 'color' }] },
         { x: 0, y: 8, align: 'left', valign: 'bottom', items: [{ ...title(c), gap: 0 }] },
         { x: 0, y: 8, beside: { block: 1, gap: 100 }, align: 'left', valign: 'bottom', items: [body(1.6, 'ink', 6)] },
         folioAt(12, 'right'),

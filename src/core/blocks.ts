@@ -70,7 +70,12 @@ export type Item =
    * 원본에서 빌린 로고. 크기는 높이(h) 또는 단 수(cols)로. 둘 다 주면 그 상자 안에 맞춘다.
    * mode: color = 원본 2색(파랑+검정), reverse = 검정 부분만 흰색(어두운 바탕), mono = 한 색
    */
-  | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; opacity?: number; gap?: number }
+  | { k: 'logo'; asset: LogoAsset; h?: number; cols?: number; mode: 'color' | 'reverse' | 'mono'; tone?: Tone; opacity?: number; gap?: number
+      /**
+       * 시각 크기(px²). 주면 로고마다 비율이 달라도 '보이는 크기'가 비슷하게 — 상자 면적을 이 값에 맞추고(획 밀도 보정),
+       * cols·h는 넘지 말아야 할 한계로만 쓴다. 안 주면 cols·h 상자를 꽉 채운다
+       */
+      area?: number }
   /** 평면 목업 (명함·봉투·쇼핑백·티셔츠). 실제 규격 비율로 그려 단 수·높이 상자 안에 맞춘다. 아래에 규격 설명이 붙는다 */
   | { k: 'mock'; kind: MockKind; cols: number; h: number; gap?: number }
   /** 가로 괘선. len은 단 수 */
@@ -154,12 +159,19 @@ export function logoSrc(doc: Doc, a: LogoAsset): LogoSrc {
   return src
 }
 
+/**
+ * 획 밀도 보정 — 같은 상자 면적이어도 꽉 찬 글자(로고타입)는 크게, 성긴 묶음(세로 시그니처)은 덜 크게 보인다.
+ * 눈으로 맞춘 값. 1보다 작을수록 같은 area에서 작게 그린다
+ */
+const OPTICAL: Record<LogoAsset, number> = { small: 1, symbol: 1, logotype: 0.62, sigH: 0.9, sigV: 0.62 }
+
 function logoSize(doc: Doc, it: Extract<Item, { k: 'logo' }>): { w: number; h: number } {
   const [, , bw, bh] = logoSrc(doc, it.asset).box
   // 단 수와 높이를 둘 다 주면 그 상자 안에 들어가는 크기 — 비율이 다른 로고(가로형·세로형)를 같은 선언으로
   const byW = it.cols ? ((R - L) / 12) * it.cols : Infinity
   const byH = it.h ?? (it.cols ? Infinity : 55)
-  const k = Math.min(byW / bw, byH / bh)
+  let k = Math.min(byW / bw, byH / bh)
+  if (it.area) k = Math.min(k, Math.sqrt((it.area * OPTICAL[it.asset]) / (bw * bh)))
   return { w: bw * k, h: bh * k }
 }
 
