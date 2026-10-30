@@ -142,15 +142,15 @@ export default function App() {
             />
           )
         })}
-        {tab === 'content' && PAGE_CONTENT.map((p) => {
+        {tab === 'content' && PAGE_CONTENT.filter((p) => p.asset === 'symbol').map((p) => {
           const decls = contentDecls(p.content, DOC, p.asset)
           return (
             <Section
               key={p.page}
-              title={`내지 변주 5 · ${p.content.pkr[0]} (원본 ${p.page}쪽)`}
+              title={`내지 변주 · ${p.content.pkr[0]} (원본 ${p.page}쪽)`}
               sub="원본 심볼 장을 기본형으로 · 제목·설명·개체·하단 캡션 위치와 개체 뒤 상자만 바꿈 · 같은 선언을 쪽마다 그림 · 개체는 단 수·높이 상자 안에 맞춤"
               content={p.content}
-              decls={[{ d: decls.base, label: '기준' }, ...decls.variants.map((d, i) => ({ d, label: num(i + 1) }))]}
+              decls={[{ d: decls.base, label: '기준' }, ...decls.variants.map((d) => ({ d, label: d.id.slice(1) }))]}
             />
           )
         })}

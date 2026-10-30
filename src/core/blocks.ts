@@ -58,7 +58,10 @@ export interface Cell extends TextStyle { s: string; dx: number; flow?: boolean 
 
 export type Item =
   /** 내용 키(part)로 줄들을 받아 쌓는다 */
-  | ({ k: 'text'; part: string; lead?: number; gap?: number } & TextStyle)
+  /**
+   * 내용 키(part)의 줄들을 쌓는다. wrap(단 수)을 주면 원본 줄바꿈을 풀고 그 폭으로 어절 단위로 다시 짠다
+   */
+  | ({ k: 'text'; part: string; lead?: number; gap?: number; wrap?: number } & TextStyle)
   /** 한 줄에 여러 칸 (번호 · 국문 · 영문처럼). 블록 정렬은 줄 전체의 잉크 폭에 맞춘다 */
   | { k: 'row'; cells: Cell[]; gap?: number }
   /** 빈 간격 */
@@ -163,13 +166,30 @@ function lines(part: string, c: Content): string[] {
 }
 
 /** 항목 높이: 글은 첫 줄 윗선(대문자 높이)부터 마지막 베이스라인까지 */
-function itemH(it: Item, c: Content, doc: Doc): number {
+/** 글 항목의 실제 줄 — wrap이 있으면 어절 단위(keep-all)로 그 폭에 다시 짠다 */
+function textLines(it: Extract<Item, { k: 'text' }>, c: Content, fonts: FontSet): string[] {
+  const src = lines(it.part, c)
+  if (!it.wrap) return src
+  const max = ((R - L) / 12) * it.wrap
+  const f = faceOf(fonts, it.font)
+  const words = src.join(' ').split(/\s+/).filter(Boolean)
+  const out: string[] = []
+  let cur = ''
+  for (const w of words) {
+    const next = cur ? `${cur} ${w}` : w
+    if (cur && inkBounds(next, it.size, f.family, f.weight).advance > max) { out.push(cur); cur = w } else cur = next
+  }
+  if (cur) out.push(cur)
+  return out
+}
+
+function itemH(it: Item, c: Content, doc: Doc, fonts: FontSet): number {
   if (it.k === 'logo') return logoSize(doc, it).h
   if (it.k === 'space') return it.h
   if (it.k === 'row') return Math.max(...it.cells.map((x) => x.size)) * CAP
   if (it.k === 'rule') return it.w ?? 1
   if (it.k === 'mock') return mockSize(it.kind, ((R - L) / 12) * it.cols, it.h).h
-  const n = lines(it.part, c).length
+  const n = textLines(it, c, fonts).length
   return it.size * CAP + (n - 1) * it.size * (it.lead ?? 1.2)
 }
 
@@ -187,7 +207,7 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
   })
 
   for (const b of d.blocks) {
-    const total = b.items.reduce((h, it, i) => h + itemH(it, c, doc) + (i < b.items.length - 1 ? it.gap ?? 0 : 0), 0)
+    const total = b.items.reduce((h, it, i) => h + itemH(it, c, doc, fonts) + (i < b.items.length - 1 ? it.gap ?? 0 : 0), 0)
     const Y = rowY(b.y)
     let y = b.valign === 'top' ? Y : b.valign === 'bottom' ? Y - total : Y - total / 2
     const X = b.pageCenter ? PAGE.w / 2 : colX(b.x)
@@ -196,7 +216,7 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
       if (it.k === 'text') {
         const pitch = it.size * (it.lead ?? 1.2)
         const f = faceOf(fonts, it.font)
-        lines(it.part, c).forEach((s, i) => {
+        textLines(it, c, fonts).forEach((s, i) => {
           // 정렬선에 글자 상자가 아니라 획 끝을 맞춘다 (광학 정렬)
           const ink = inkBounds(f.upper ? s.toUpperCase() : s, it.size, f.family, f.weight)
           const x = b.align === 'left' ? X - ink.left : b.align === 'right' ? X - ink.right : X - (ink.left + ink.right) / 2
@@ -236,7 +256,7 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
         const lw = it.w ?? 1
         els.push({ t: 'rect', id: id(), box: [x, y, len, lw], fill: C[it.tone], opacity: it.opacity })
       }
-      y += itemH(it, c, doc) + (it.gap ?? 0)
+      y += itemH(it, c, doc, fonts) + (it.gap ?? 0)
     }
   }
   return { page, w: PAGE.w, h: PAGE.h, els }
