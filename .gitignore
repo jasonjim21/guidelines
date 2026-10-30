@@ -4,3 +4,4 @@ artifact
 shots
 *.log
 *.tsbuildinfo
+references/local/

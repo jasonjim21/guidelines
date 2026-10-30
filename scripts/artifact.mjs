@@ -17,7 +17,7 @@ const keep = head
   .filter((l) => l && !/<meta charset|<meta name="viewport"/.test(l))
 
 // body 바탕은 아티팩트 골격용. 앱 CSS는 .gle 아래에만 있어서 여기서 따로 칠한다.
-const bodyBg = `<style>body{background:#f3f3f0}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body{background:#151614}}:root[data-theme="dark"] body{background:#151614}</style>`
+const bodyBg = `<style>body{background:#e9e9e6}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body{background:#141513}}:root[data-theme="dark"] body{background:#141513}</style>`
 const page = [
   ...keep.filter((l) => l.startsWith('<title')),
   '<meta name="claude:viewport-fit-sides" content="cover">',

@@ -40,7 +40,6 @@ async function shot(name, { width, height, scheme = 'light', act } = {}) {
 await shot('desktop', { width: 1600, height: 1000 })
 await shot('desktop-dark', { width: 1600, height: 1000, scheme: 'dark' })
 await shot('phone', { width: 400, height: 900 })
-await shot('ref', { width: 1600, height: 1000, act: (p) => p.getByRole('button', { name: '레퍼런스 실측' }).click() })
 
 await browser.close()
 server.close()

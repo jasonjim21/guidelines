@@ -1,43 +1,53 @@
 /**
- * 글자체 쌍 — 렌더 인자다. 레이아웃 선언에는 서체가 들어가지 않는다.
+ * 글자체는 렌더 인자다. 원자료에는 원본 서체 이름만 있고, 무엇으로 그릴지는 여기서 정한다.
  *
- * 국문·영문을 한 쌍으로 고른다. font-family를 "영문, 국문" 순으로 걸어서
- * 라틴 글자는 영문 서체가, 한글은 국문 서체가 그린다.
- * 상업 배포가 가능한 OFL 서체만, 굵기 400–700이 실제로 있는 것만 넣는다.
- * Pretendard는 npm 패키지로 번들, 나머지는 Google Fonts(index.html 링크).
+ * 원본 서체 중 상업 배포가 가능한 OFL은 Pretendard·Inter·SUIT뿐이다.
+ * 이사만루체(esamanru)·Prohibition은 OFL이 아니어서 대체한다.
+ * 대체 서체는 원본과 폭이 달라 글줄 길이가 바뀌므로, 원본 폭(w)에 맞춰 늘이고 줄인다(fit).
+ * OFL 원본(Pretendard·Inter)은 그대로 — 글줄 길이가 원본과 같아야 한다.
  */
-export interface FontPair {
-  id: string
-  name: string
-  kr: string
-  en: string
-  note: string
+export interface Face {
+  family: string
+  weight: number
+  /** 원본 서체가 대문자 전용 */
+  upper?: boolean
+  /** 원본 폭에 맞춰 늘이고 줄인다 (대체 서체만) */
+  fit?: boolean
 }
 
-export const FONT_PAIRS: FontPair[] = [
-  { id: 'pretendard', name: 'Pretendard', kr: 'Pretendard Variable', en: 'Pretendard Variable', note: '국·영문 한 서체. 기본값' },
-  { id: 'pretendard-inter', name: 'Pretendard + Inter', kr: 'Pretendard Variable', en: 'Inter', note: '레퍼런스와 같은 조합' },
-  { id: 'plex', name: 'IBM Plex Sans KR + Plex Sans', kr: 'IBM Plex Sans KR', en: 'IBM Plex Sans', note: '기계적인 인상, 획 끝이 각짐' },
-  { id: 'noto-archivo', name: 'Noto Sans KR + Archivo', kr: 'Noto Sans KR', en: 'Archivo', note: '영문 폭이 약간 좁고 단단함' },
-  { id: 'gothic-manrope', name: 'Gothic A1 + Manrope', kr: 'Gothic A1', en: 'Manrope', note: '부드럽고 둥근 영문' },
+export interface FontSet {
+  id: string
+  name: string
+  /** 원본 서체 이름(굵기 접미사 뺀 것) → 그릴 서체 */
+  map: Record<string, (weight: string) => Face>
+}
+
+const W: Record<string, number> = {
+  ExtraLight: 200, Light: 300, Regular: 400, Medium: 500, SemiBold: 600, Bold: 700, ExtraBold: 800,
+}
+
+const PRETENDARD = '"Pretendard Variable", Pretendard, sans-serif'
+
+export const FONT_SETS: FontSet[] = [
+  {
+    id: 'ofl',
+    name: 'OFL 대체 (이사만루 → Pretendard, Prohibition → Barlow Condensed)',
+    map: {
+      Pretendard: (w) => ({ family: PRETENDARD, weight: W[w] ?? 400 }),
+      SUIT: (w) => ({ family: PRETENDARD, weight: W[w] ?? 600 }),
+      Inter: (w) => ({ family: '"Inter", sans-serif', weight: W[w] ?? 400 }),
+      // 이사만루체 Medium은 획이 두꺼워 한 단계 올려 그린다
+      esamanruOTF: (w) => ({ family: PRETENDARD, weight: { Light: 400, Medium: 700, Bold: 800 }[w] ?? 700, fit: true }),
+      Prohibition: () => ({ family: '"Barlow Condensed", sans-serif', weight: 600, upper: true, fit: true }),
+    },
+  },
 ]
 
-export const pairById = (id: string) => FONT_PAIRS.find((p) => p.id === id) ?? FONT_PAIRS[0]
-
-export const familyOf = (p: FontPair) =>
-  p.en === p.kr ? `"${p.kr}", sans-serif` : `"${p.en}", "${p.kr}", sans-serif`
-
-/**
- * 측정 전에 실제 글리프를 받아 둔다. 구글 한글 서체는 유니코드 구간별로 쪼개져 있어서
- * 쓰는 글자를 넘겨야 그 구간이 내려온다.
- */
-export async function loadPair(p: FontPair, text: string): Promise<void> {
-  const fonts = (document as Document & { fonts?: FontFaceSet }).fonts
-  if (!fonts) return
-  const sample = Array.from(new Set(text + '가나다ABCabc0123')).join('')
-  const jobs: Promise<unknown>[] = []
-  for (const fam of new Set([p.kr, p.en])) {
-    for (const w of [400, 500, 600, 700]) jobs.push(fonts.load(`${w} 32px "${fam}"`, sample).catch(() => null))
-  }
-  await Promise.all(jobs)
+/** 'esamanruOTFMedium' · 'Pretendard-Regular' → 서체 */
+export function faceOf(set: FontSet, font: string): Face {
+  const m = font.match(/^(.*?)-?(ExtraLight|Light|Regular|Medium|SemiBold|ExtraBold|Bold)$/)
+  const fam = m ? m[1] : font
+  const wt = m ? m[2] : 'Regular'
+  const f = set.map[fam]
+  return f ? f(wt) : { family: PRETENDARD, weight: 400, fit: true }
 }
