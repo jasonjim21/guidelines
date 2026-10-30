@@ -19,6 +19,13 @@ function ElNode({ el, assets, fonts, cid, pid, track }: { el: El; assets: Assets
     clipPath: shape ? `url(#${pid(shape)})` : el.clip ? `url(#${cid(el.clip)})` : undefined,
   }
   switch (el.t) {
+    case 'group':
+      // 안쪽 잘라내기는 원본 좌표로 정의돼 있다 — transform 안에서 쓰면 같이 옮겨진다
+      return (
+        <g transform={`translate(${el.tf[1]} ${el.tf[2]}) scale(${el.tf[0]})`} opacity={el.opacity}>
+          {el.els.map((c) => <ElNode key={c.id} el={c} assets={assets} fonts={fonts} cid={cid} pid={pid} track={track} />)}
+        </g>
+      )
     case 'rect': {
       const [x, y, w, h] = el.box
       return <rect x={x} y={y} width={w} height={h} fill={el.fill ?? 'none'} fillOpacity={el.fillOpacity} {...common} />
@@ -62,10 +69,13 @@ function ElNode({ el, assets, fonts, cid, pid, track }: { el: El; assets: Assets
 /** track: 자간(em). 변주는 −2%, 원본 재현은 원본 그대로(0) */
 export function PageSvg({ page, assets, fonts, track = TRACK }: { page: DocPage; assets: Assets; fonts: FontSet; track?: number }) {
   const clips = new Map<string, number[]>()
-  page.els.forEach((e) => { if (e.clip) clips.set(clipKey(e.clip), e.clip) })
+  const flat: El[] = []
+  const walk = (es: El[]) => es.forEach((e) => { flat.push(e); if (e.t === 'group') walk(e.els) })
+  walk(page.els)
+  flat.forEach((e) => { if (e.clip) clips.set(clipKey(e.clip), e.clip) })
   const cid = (b: number[]) => `c${page.page}_${clipKey(b)}`
   const pid = (k: string) => k.replace(/[^a-z0-9]/gi, '_')
-  const shapes = new Set(page.els.map((e) => e.clipPath).filter((k): k is string => !!k && !!assets[k]))
+  const shapes = new Set(flat.map((e) => e.clipPath).filter((k): k is string => !!k && !!assets[k]))
   return (
     <svg viewBox={`0 0 ${page.w} ${page.h}`} xmlns="http://www.w3.org/2000/svg" role="img" aria-label={`${page.page}쪽`}>
       <defs>

@@ -143,7 +143,7 @@ export default function App() {
           )
         })}
         {tab === 'content' && PAGE_CONTENT.map((p) => {
-          const decls = contentDecls(p.content, DOC, p.asset)
+          const decls = contentDecls(p.content, DOC, p.asset, p.page)
           return (
             <Section
               key={p.page}

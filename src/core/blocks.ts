@@ -2,6 +2,7 @@ import type { Doc, DocPage, El } from './doc'
 import { faceOf, type FontSet } from './fonts'
 import { inkBounds } from './ink'
 import { drawMock, mockSize, type MockKind } from './mockup'
+import { pageObject } from './object'
 
 /**
  * 장표 블록 엔진 — 표지·목차 변주가 같이 쓴다.
@@ -76,6 +77,8 @@ export type Item =
        * cols·h는 넘지 말아야 할 한계로만 쓴다. 안 주면 cols·h 상자를 꽉 채운다
        */
       area?: number }
+  /** 원본 내지 한 쪽의 개체 묶음(색 띠·견본·행렬 등)을 cols·h 상자 안에 맞춰 옮긴다 */
+  | { k: 'object'; page: number; cols?: number; h?: number; gap?: number }
   /** 평면 목업 (명함·봉투·쇼핑백·티셔츠). 실제 규격 비율로 그려 단 수·높이 상자 안에 맞춘다. 아래에 규격 설명이 붙는다 */
   | { k: 'mock'; kind: MockKind; cols: number; h: number; gap?: number }
   /** 가로 괘선. len은 단 수 */
@@ -163,7 +166,15 @@ export function logoSrc(doc: Doc, a: LogoAsset): LogoSrc {
  * 획 밀도 보정 — 같은 상자 면적이어도 꽉 찬 글자(로고타입)는 크게, 성긴 묶음(세로 시그니처)은 덜 크게 보인다.
  * 눈으로 맞춘 값. 1보다 작을수록 같은 area에서 작게 그린다
  */
-const OPTICAL: Record<LogoAsset, number> = { small: 1, symbol: 1, logotype: 0.62, sigH: 0.9, sigV: 0.62 }
+const OPTICAL: Record<LogoAsset, number> = { small: 1, symbol: 1, logotype: 0.62, sigH: 0.9, sigV: 0.85 }
+
+function objectSize(doc: Doc, it: Extract<Item, { k: 'object' }>): { w: number; h: number; k: number } {
+  const [, , bw, bh] = pageObject(doc, it.page).box
+  const byW = it.cols ? ((R - L) / 12) * it.cols : Infinity
+  const byH = it.h ?? Infinity
+  const k = Math.min(1, byW / bw, byH / bh) // 원본보다 키우지 않는다 — 안의 글이 같이 커진다
+  return { w: bw * k, h: bh * k, k }
+}
 
 function logoSize(doc: Doc, it: Extract<Item, { k: 'logo' }>): { w: number; h: number } {
   const [, , bw, bh] = logoSrc(doc, it.asset).box
@@ -202,6 +213,7 @@ function itemH(it: Item, c: Content, doc: Doc, fonts: FontSet): number {
   if (it.k === 'space') return it.h
   if (it.k === 'row') return Math.max(...it.cells.map((x) => x.size)) * CAP
   if (it.k === 'rule') return it.w ?? 1
+  if (it.k === 'object') return objectSize(doc, it).h
   if (it.k === 'mock') return mockSize(it.kind, ((R - L) / 12) * it.cols, it.h).h
   const n = textLines(it, c, fonts).length
   return it.size * CAP + (n - 1) * it.size * (it.lead ?? 1.2)
@@ -265,6 +277,11 @@ export function renderPage(d: PageDecl, c: Content, doc: Doc, fonts: FontSet, pa
         const { w, h } = logoSize(doc, it)
         const x = b.align === 'left' ? X : b.align === 'right' ? X - w : X - w / 2
         placeLogo(els, id, doc, it.asset, x, y, h, it.mode, it.tone, it.opacity)
+      } else if (it.k === 'object') {
+        const o = pageObject(doc, it.page)
+        const { w, h, k } = objectSize(doc, it)
+        const x = b.align === 'left' ? X : b.align === 'right' ? X - w : X - w / 2
+        els.push({ t: 'group', id: id(), box: [x, y, w, h], tf: [k, x - o.box[0] * k, y - o.box[1] * k], els: o.els })
       } else if (it.k === 'mock') {
         const { w } = mockSize(it.kind, ((R - L) / 12) * it.cols, it.h)
         const x = b.align === 'left' ? X : b.align === 'right' ? X - w : X - w / 2

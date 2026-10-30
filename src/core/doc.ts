@@ -27,12 +27,16 @@ export type El =
       tf?: [number, number, number]
     })
   | (Base & { t: 'image'; box: Box })
+  | GroupEl
   | (Base & {
       t: 'text'; s: string; x: number; y: number; size: number; font: string; fill: string
       /** 원본 줄 폭 (참고값 — 글자를 이 폭에 맞춰 늘이지 않는다) */
       w?: number
       anchor?: 'start' | 'middle' | 'end'
     })
+
+/** 묶음 — 안의 요소는 원본 좌표 그대로, 묶음째 옮기고 키운다 ([배율, x 이동, y 이동]) */
+export type GroupEl = Base & { t: 'group'; box: Box; tf: [number, number, number]; els: El[] }
 
 export interface DocPage { page: number; w: number; h: number; els: El[] }
 export interface Doc { source: string; unit: string; fonts: string[]; pages: DocPage[] }
