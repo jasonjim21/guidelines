@@ -11,6 +11,7 @@ import { tocContent, tocDecls, tocText } from '../core/toc'
 import { DIVIDER_BASE, dividerDecls, dividerDevelop } from '../core/divider'
 import { CONTENT_PAGES, FORMAT_NAMES, contentDecls, contentPageText } from '../core/content'
 import { APP_ITEMS, appContent, appDecl } from '../core/application'
+import { buildDeck, choiceFromQuery, type DeckChoice } from '../core/deck'
 
 const DOC = raw as unknown as Doc
 
@@ -52,13 +53,57 @@ function Section({ title, sub, decls, content = CONTENT }: { title: string; sub:
   )
 }
 
-type Tab = 'cover' | 'toc' | 'divider' | 'content' | 'application'
+const PICKS: { key: keyof DeckChoice; label: string; options: string[] }[] = [
+  { key: 'cover', label: '표지', options: ['원본', ...Array.from({ length: 10 }, (_, i) => String(i + 1).padStart(2, '0'))] },
+  { key: 'toc', label: '목차', options: ['원본', ...Array.from({ length: 10 }, (_, i) => String(i + 1).padStart(2, '0'))] },
+  { key: 'divider', label: '간지', options: ['원본', ...Array.from({ length: 10 }, (_, i) => String(i + 1).padStart(2, '0'))] },
+  { key: 'format', label: '내지 틀', options: ['1', '2', '3', '4'] },
+]
+
+/** 전체 장표 — 표지·목차·간지는 하나씩, 내지는 틀 하나를 골라 끝까지 잇는다 (deck.ts의 buildDeck) */
+function DeckView({ choice, onChange }: { choice: DeckChoice; onChange: (c: DeckChoice) => void }) {
+  const fonts = FONT_SETS[0]
+  const pages = buildDeck(DOC, fonts, choice)
+  return (
+    <section className="gle-section">
+      <header className="gle-bar">
+        <h1>전체 장표 {pages.length}장</h1>
+        <p>표지 · 목차 · 간지(기본 시스템) · 내지 13장 · 간지(응용 시스템) · 응용 시스템 5장 — 고른 조합 그대로 산출물이 된다</p>
+      </header>
+      <div className="gle-picks">
+        {PICKS.map((p) => (
+          <label key={p.key}>
+            <span>{p.label}</span>
+            <select value={p.key === 'format' ? choice.format - 1 : choice[p.key]}
+              onChange={(e) => onChange({ ...choice, [p.key]: Number(e.target.value) + (p.key === 'format' ? 1 : 0) })}>
+              {p.options.map((o, i) => <option key={o} value={i}>{o}</option>)}
+            </select>
+          </label>
+        ))}
+      </div>
+      <div className="gle-grid">
+        {pages.map((p, i) => (
+          <figure key={i} className="gle-page">
+            <PageSvg page={p.page} assets={ASSETS} fonts={fonts} track={p.track} />
+            <figcaption>
+              <span className="gle-num">{String(i + 1).padStart(2, '0')}</span>
+              <strong>{p.name}</strong>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+type Tab = 'cover' | 'toc' | 'divider' | 'content' | 'application' | 'deck'
 const TABS: { id: Tab; label: string; ready: boolean }[] = [
   { id: 'cover', label: '표지', ready: true },
   { id: 'toc', label: '목차', ready: true },
   { id: 'divider', label: '간지', ready: true },
   { id: 'content', label: '내지', ready: true },
   { id: 'application', label: '응용 시스템', ready: true },
+  { id: 'deck', label: '전체 장표', ready: true },
 ]
 const readHash = (): Tab => {
   try {
@@ -69,13 +114,14 @@ const readHash = (): Tab => {
 
 const route = (() => { try { return location.hash } catch { return '' } })()
 const isOriginal = route === '#original'
-/** #deck — 전체 장표: 원본 17장에 목차(응용 시스템 5항목)와 응용 시스템 내지 5장을 넣은 문서 순서 */
-const isDeck = route === '#deck'
+/** #deck?cover=3&toc=2&divider=4&format=2 — 고른 조합의 전체 장표 (deck.ts). scripts/export-html.mjs가 이 화면을 뽑는다 */
+const isDeck = route === '#deck' || route.startsWith('#deck?')
 
 export default function App() {
   const [, setReady] = useState(0)
   const [tab, setTab] = useState<Tab>(readHash)
   const [fmt, setFmt] = useState(0)
+  const [choice, setChoice] = useState<DeckChoice>({ cover: 0, toc: 0, divider: 0, format: 1 })
   useEffect(() => {
     const sample = Object.values(CONTENT).flat().join('')
     const all = sample + sample.toUpperCase()
@@ -92,16 +138,11 @@ export default function App() {
   // #original — 원본 재현 17장만 (원본 자간 그대로). scripts/export-html.mjs가 이 화면을 HTML 한 파일로 뽑는다
   if (isDeck) {
     const fonts = FONT_SETS[0]
-    const pages = [
-      DOC.pages[0],
-      renderPage(TOC_DECLS.base, CONTENT, DOC, fonts, 2),
-      ...DOC.pages.slice(2),
-      ...APP_ITEMS.map((it, i) => renderPage(appDecl(it, { ...CONTENT, ...appContent(it, CONTENT.folio) }), { ...CONTENT, ...appContent(it, CONTENT.folio) }, DOC, fonts, 18 + i)),
-    ]
+    const pages = buildDeck(DOC, fonts, choiceFromQuery(route.split('?')[1] ?? ''))
     return (
       <div className="gle">
         <main className="gle-original">
-          {pages.map((p, i) => <PageSvg key={i} page={{ ...p, page: i + 1 }} assets={ASSETS} fonts={fonts} track={0} />)}
+          {pages.map((p, i) => <PageSvg key={i} page={p.page} assets={ASSETS} fonts={fonts} track={p.track} />)}
         </main>
       </div>
     )
@@ -147,6 +188,7 @@ export default function App() {
             />
           )
         })}
+        {tab === 'deck' && <DeckView choice={choice} onChange={setChoice} />}
         {tab === 'content' && (
           <nav className="gle-formats" aria-label="내지 틀">
             {FORMAT_NAMES.map((n, k) => (

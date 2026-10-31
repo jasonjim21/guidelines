@@ -132,16 +132,21 @@ npm run build && node scripts/compare.mjs /tmp/orig shots/compare   # 쪽마다 
 현재(fuzz 12%) 다른 픽셀 0.1–4.6%. 남는 차이는 대체 서체(이사만루체·Prohibition)의 글자 모양,
 사진 잘림 위치, 그라데이션(셰이딩)을 사진으로 받은 것. 배치·글줄·색은 일치.
 
-## 장표를 HTML 한 파일로 내보내기
+## 전체 장표 = 산출물 (`src/core/deck.ts`)
+
+`buildDeck(doc, fonts, { cover, toc, divider, format })` — 표지·목차·간지는 0(원본)·1–10 중 하나, 내지는 틀 1–4 중 하나.
+22장: 표지 · 목차 · 간지(기본 시스템) · 내지 13장(원본 4–16쪽) · 간지(응용 시스템, 원본 17쪽 자리) · 응용 시스템 5장.
+응용 시스템 간지는 같은 간지 선언에 1번 장 키(kr1·en1·enl1·ab1)를 0번 자리로 넣어 그린다.
+넘겨받는 쪽은 이 함수와 `PageSvg`만 쓴다. 화면 '전체 장표' 탭과 주소 `#deck?cover=6&toc=3&divider=4&format=3`이 같은 함수.
 
 ```bash
-npm run build && node scripts/export-html.mjs            # 전체 장표 22장 → export/samwoo-ci-v1-full.html
-npm run build && node scripts/export-html.mjs original   # 원본 재현 17장 → export/samwoo-ci-v1.html
+npm run build && node scripts/export-html.mjs deck "cover=6&toc=3&divider=4&format=3"   # → export/samwoo-ci-v1-full-c6t3d4f3.html
+npm run build && node scripts/export-html.mjs original                                  # 원본 재현 17장 → export/samwoo-ci-v1.html
+npm run build && node scripts/handoff.mjs                                               # 넘길 묶음 → export/guideline-engine.zip
 ```
 
-전체 장표(`#deck`) 순서: 원본 1쪽 · 목차(원본형, 응용 시스템 5항목, 구분표 없음) · 원본 3–17쪽 · 응용 시스템 내지 5장.
-원본 자간 그대로(변주의 −2%는 걸지 않는다). 빌드된 화면에서 SVG를 그대로 꺼내
-Pretendard(번들)·Inter·Barlow Condensed(라틴 구간)를 data URL로 품는다. 브라우저 인쇄 시 1920×1080 한 장씩.
+HTML은 빌드된 화면에서 SVG를 그대로 꺼내 Pretendard(번들)·Inter·Barlow Condensed(라틴 구간)를 data URL로 품는다.
+브라우저 인쇄 시 1920×1080 한 장씩. 넘길 묶음(zip)은 저장소 파일 + references/local(로고·사진) + export/의 HTML.
 로고 패스·사진이 들어가므로 `export/`는 gitignore.
 
 ## 아티팩트로 올리기

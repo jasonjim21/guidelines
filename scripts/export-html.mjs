@@ -1,6 +1,7 @@
 // 장표를 HTML 한 파일로 뽑는다 — 서체·그림까지 다 품어서 인터넷 없이 열린다.
-// 사용: npm run build && node scripts/export-html.mjs [deck|original] [출력 경로]
-//   deck     — 전체 장표 (원본 17장 + 목차 응용 시스템 5항목 + 응용 시스템 내지 5장), 기본값
+// 사용: npm run build && node scripts/export-html.mjs [deck|original] [조합] [출력 경로]
+//   deck     — 고른 조합의 전체 장표 22장 (src/core/deck.ts), 기본값
+//              조합: 'cover=3&toc=2&divider=4&format=2' (0 = 원본, 표지·목차·간지 1–10, 내지 틀 1–4)
 //   original — 원본 재현 17장만
 // 그림(로고 패스·사진)이 들어가므로 출력은 저장소에 넣지 않는다 (export/ 는 gitignore).
 import http from 'node:http'
@@ -12,7 +13,10 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const { chromium } = require('playwright')
 const route = process.argv[2] === 'original' ? 'original' : 'deck'
-const out = path.resolve(process.argv[3] ?? (route === 'deck' ? 'export/samwoo-ci-v1-full.html' : 'export/samwoo-ci-v1.html'))
+const args = process.argv.slice(3)
+const query = route === 'deck' && args[0]?.includes('=') ? args.shift() : ''
+const tag = query ? '-' + [...new URLSearchParams(query)].map(([k, v]) => `${k[0]}${v}`).join('') : ''
+const out = path.resolve(args[0] ?? (route === 'deck' ? `export/samwoo-ci-v1-full${tag}.html` : 'export/samwoo-ci-v1.html'))
 const TITLE = route === 'deck' ? '삼우건기 CI 가이드라인 v1 — 전체 장표' : '삼우건기 CI 가이드라인 v1 — 원본 재현'
 fs.mkdirSync(path.dirname(out), { recursive: true })
 
@@ -46,7 +50,7 @@ const server = http.createServer((q, r) => {
 const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1' } : undefined
 const browser = await chromium.launch({ proxy })
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true })
-await page.goto(`http://127.0.0.1:${server.address().port}/index.html#${route}`)
+await page.goto(`http://127.0.0.1:${server.address().port}/index.html#${route}${query ? '?' + query : ''}`)
 await page.waitForTimeout(3000)
 const svgs = await page.locator('.gle-original svg').evaluateAll((els) => els.map((e) => e.outerHTML))
 await browser.close()
