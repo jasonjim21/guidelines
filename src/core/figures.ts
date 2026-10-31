@@ -1,7 +1,6 @@
 import type { Box, Doc, El, GroupEl } from './doc'
-import { colX, rowY } from './blocks'
 import { isHeadText } from './object'
-import type { Special } from './specials'
+import type { Area, Special } from './specials'
 
 /**
  * 여백 규정(8)·최소 크기(9)·사용 위반(13)·국문/영문 서체(14·15)·그래픽 모티브(16) 전용 레이아웃.
@@ -136,7 +135,6 @@ function caption(f: Figure, x: number, y: number, anchor: 'start' | 'end' = 'sta
 const capH = (f: Figure) => (f.caption.length ? (f.cap ?? DEF_CAP).size * 1.5 * f.caption.length + 12 : 0)
 const tint = (x: number, y: number, w: number, h: number, fill = '#004ed8', opacity = 0.05): El => ({ t: 'rect', id: nid(), box: [x, y, w, h], fill, opacity })
 
-const AREA = { x: 673.3, y: 191, r: 1820, b: 927 }
 
 /**
  * 한 배율 — 그림끼리 크기 관계가 내용인 쪽(최소 크기 20mm·10mm, 여백 규정)은 모든 그림을 같은 배율로.
@@ -146,8 +144,8 @@ const common = (fs: Figure[], frames: Frame[], maxScale: number) =>
   Math.min(maxScale, ...fs.map((f, i) => Math.min(frames[i].w / f.box[2], frames[i].h / f.box[3])))
 
 /** 가로 한 줄 — 같은 높이 칸에 나란히, 설명은 아래 */
-function row(fs: Figure[], o: { gap?: number; tile?: boolean; maxScale?: number; area?: typeof AREA; uniform?: boolean } = {}): El[] {
-  const a = o.area ?? AREA, gap = o.gap ?? 32
+function row(fs: Figure[], o: { gap?: number; tile?: boolean; maxScale?: number; area: Area; uniform?: boolean }): El[] {
+  const a = o.area, gap = o.gap ?? 32
   const w = (a.r - a.x - gap * (fs.length - 1)) / fs.length
   const ch = Math.max(...fs.map(capH))
   const out: El[] = []
@@ -167,8 +165,8 @@ function row(fs: Figure[], o: { gap?: number; tile?: boolean; maxScale?: number;
 }
 
 /** 격자 — cols 단, 설명은 칸 아래(below) 또는 칸 안 왼쪽 위(inside) */
-function grid(fs: Figure[], cols: number, o: { gap?: number; cap?: 'below' | 'inside'; mode?: 'contain' | 'cover'; area?: typeof AREA; bleed?: boolean } = {}): El[] {
-  const a = o.area ?? AREA, gap = o.gap ?? 24
+function grid(fs: Figure[], cols: number, o: { gap?: number; cap?: 'below' | 'inside'; mode?: 'contain' | 'cover'; area: Area }): El[] {
+  const a = o.area, gap = o.gap ?? 24
   const rows = Math.ceil(fs.length / cols)
   const ch = o.cap === 'below' ? Math.max(...fs.map(capH)) : 0
   const w = (a.r - a.x - gap * (cols - 1)) / cols
@@ -184,8 +182,8 @@ function grid(fs: Figure[], cols: number, o: { gap?: number; cap?: 'below' | 'in
 }
 
 /** 세로 목록 — 그림은 오른쪽 끝을 맞추고 설명은 옆 단 */
-function list(fs: Figure[], o: { capW?: number; area?: typeof AREA; capSide?: 'left' | 'right'; uniform?: boolean; maxScale?: number } = {}): El[] {
-  const a = o.area ?? AREA, capW = o.capW ?? 320, gap = 48
+function list(fs: Figure[], o: { capW?: number; area: Area; capSide?: 'left' | 'right'; uniform?: boolean; maxScale?: number }): El[] {
+  const a = o.area, capW = o.capW ?? 320, gap = 48
   const h = (a.b - a.y - gap * (fs.length - 1)) / fs.length
   const out: El[] = []
   const left = o.capSide === 'left'
@@ -203,8 +201,8 @@ function list(fs: Figure[], o: { capW?: number; area?: typeof AREA; capSide?: 'l
 }
 
 /** 하나 크게 + 나머지 작게 (오른쪽 또는 아래로) */
-function feature(fs: Figure[], o: { side?: 'right' | 'below'; split?: number; cols?: number; area?: typeof AREA } = {}): El[] {
-  const a = o.area ?? AREA, gap = 24
+function feature(fs: Figure[], o: { side?: 'right' | 'below'; split?: number; cols?: number; area: Area }): El[] {
+  const a = o.area, gap = 24
   const [main, ...rest] = fs
   const out: El[] = []
   if ((o.side ?? 'right') === 'right') {
@@ -219,19 +217,21 @@ function feature(fs: Figure[], o: { side?: 'right' | 'below'; split?: number; co
   return out
 }
 
-/** 재단선까지 가는 띠 위에 그림을 나란히 */
-function band(fs: Figure[], y0: number, o: { fill?: string; opacity?: number } = {}): El[] {
-  const out: El[] = [tint(0, y0, 1920, 1080 - y0, o.fill ?? '#004ed8', o.opacity ?? 0.05)]
-  out.push(...row(fs, { area: { x: 100, y: y0 + 80, r: 1820, b: 1000 }, gap: 64, maxScale: 1.3, uniform: true }))
-  return out
+/** 옅은 판(주조색 5%)을 개체 자리에 깔고 그 위에 그림을 나란히 */
+function panel(fs: Figure[], a: Area): El[] {
+  return [tint(a.x, a.y, a.r - a.x, a.b - a.y), ...row(fs, { area: { x: a.x + 64, y: a.y + 64, r: a.r - 64, b: a.b - 40 }, gap: 64, maxScale: 1.3, uniform: true })]
 }
 
 /* ------------------------------------------------------------------ *
- * 쪽마다 4개
+ * 쪽마다 4개 — 틀(내지 1–4)은 고정, 개체 자리(a) 안의 표현만
  * ------------------------------------------------------------------ */
 
-const S = (id: string, name: string, note: string, draw: () => El[], head: Special['head'] = 'top', folio: Special['folio'] = 'left'): Special => ({ id, name, note, draw, head, folio })
-const LEFT = { x: 100, y: AREA.y, r: colX(7.6), b: AREA.b } // 글을 오른쪽으로 보낼 때 그림 자리
+const S = (id: string, name: string, note: string, draw: (a: Area) => El[]): Special => ({ id, name, note, draw })
+/** 한 줄 넷 — 칸 비율 4:3으로 자리 가운데 */
+const strip = (a: Area, n: number, gap: number): Area => {
+  const w = (a.r - a.x - gap * (n - 1)) / n, h = Math.min(a.b - a.y, w * 0.75), y = (a.y + a.b - h) / 2
+  return { ...a, y, b: y + h }
+}
 
 export function figureLayouts(doc: Doc, n: number): Special[] {
   const fs = figuresOf(doc, n)
@@ -239,44 +239,43 @@ export function figureLayouts(doc: Doc, n: number): Special[] {
   switch (n) {
     case 8:
       return [
-        S('f8a', '나란히', '심볼과 시그니처 여백 그림을 한 줄로 나란히, 세로 가운데 (같은 배율)', () => row(fs, { uniform: true })),
-        S('f8b', '옅은 판 둘', '그림마다 옅은 판(주조색 5%)을 깔아 영역을 나눔', () => row(fs, { tile: true, gap: 24, uniform: true })),
-        S('f8c', '시그니처 크게', '시그니처 여백 그림을 크게, 심볼 여백 그림은 오른쪽에 작게', () => feature([fs[1], fs[0]], { split: 0.66 })),
-        S('f8d', '재단 띠', '쪽 아래 2/3를 옅은 띠로 재단선까지 깔고 그 위에 두 그림', () => band(fs, rowY(2.4)), 'top', 'top'),
+        S('f8a', '나란히', '심볼과 시그니처 여백 그림을 한 줄로 나란히, 세로 가운데 (같은 배율)', (a) => row(fs, { area: a, uniform: true })),
+        S('f8b', '옅은 판 둘', '그림마다 옅은 판(주조색 5%)을 깔아 영역을 나눔', (a) => row(fs, { area: a, tile: true, gap: 24, uniform: true })),
+        S('f8c', '시그니처 크게', '시그니처 여백 그림을 크게, 심볼 여백 그림은 오른쪽에 작게', (a) => feature([fs[1], fs[0]], { area: a, split: 0.66 })),
+        S('f8d', '옅은 판 한 장', '개체 자리 전체에 옅은 판을 한 장 깔고 그 위에 두 그림', (a) => panel(fs, a)),
       ]
     case 9:
       return [
-        // 두 크기의 관계(20mm·10mm)가 내용이므로 모든 레이아웃에서 같은 배율
-        S('f9a', '나란히 + 아래 설명', '두 크기를 한 줄로 나란히 놓고 치수 설명을 각 그림 아래로. 두 그림은 같은 배율', () => row(fs, { maxScale: 1.4, uniform: true })),
-        S('f9b', '설명 왼쪽 목록', '원본의 목록을 뒤집어 설명을 왼쪽 단에, 그림은 그 오른쪽에 왼쪽 맞춤', () => list(fs, { capSide: 'left', capW: 340, uniform: true })),
-        S('f9c', '옅은 판', '크기마다 옅은 판 위에 그림, 설명은 판 아래. 같은 배율', () => row(fs, { tile: true, gap: 24, maxScale: 1.4, uniform: true })),
-        S('f9d', '그림 왼쪽 · 글 오른쪽', '두 그림과 설명을 왼쪽 8단 목록으로, 제목·설명은 오른쪽 아래', () => list(fs, { area: LEFT, capW: 300, uniform: true }), 'right'),
+        // 두 크기의 관계(20mm·10mm)가 내용이므로 모든 표현에서 같은 배율
+        S('f9a', '나란히 + 아래 설명', '두 크기를 한 줄로 나란히 놓고 치수 설명을 각 그림 아래로. 두 그림은 같은 배율', (a) => row(fs, { area: a, maxScale: 1.4, uniform: true })),
+        S('f9b', '설명 왼쪽 목록', '원본의 목록을 뒤집어 설명을 왼쪽 단에, 그림은 그 오른쪽에 왼쪽 맞춤', (a) => list(fs, { area: a, capSide: 'left', capW: 340, uniform: true })),
+        S('f9c', '옅은 판', '크기마다 옅은 판 위에 그림, 설명은 판 아래. 같은 배율', (a) => row(fs, { area: a, tile: true, gap: 24, maxScale: 1.4, uniform: true })),
+        S('f9d', '설명 오른쪽 목록', '원본처럼 그림 위아래 목록, 설명은 오른쪽 단', (a) => list(fs, { area: a, capW: 300, uniform: true })),
       ]
     case 13:
       return [
-        S('f13a', '설명 아래 3×3', '원본 3×3에서 설명을 타일 아래로 내림', () => grid(fs, 3, { cap: 'below', gap: 24 })),
-        S('f13b', '틈 없는 격자', '타일 사이 틈을 없애 한 장의 판처럼, 설명은 타일 안 왼쪽 위', () => grid(fs, 3, { cap: 'inside', gap: 2 })),
-        S('f13c', '하나 크게 + 여덟', '첫 사례를 크게, 나머지 여덟은 아래 4×2', () => feature(fs, { side: 'below', split: 0.5, cols: 4 })),
-        S('f13d', '격자 왼쪽 · 글 오른쪽', '3×3을 왼쪽 8단으로, 제목·설명은 오른쪽 아래', () => grid(fs, 3, { cap: 'below', gap: 16, area: LEFT }), 'right'),
+        S('f13a', '설명 아래 3×3', '원본 3×3에서 설명을 타일 아래로 내림', (a) => grid(fs, 3, { area: a, cap: 'below', gap: 24 })),
+        S('f13b', '틈 없는 격자', '타일 사이 틈을 없애 한 장의 판처럼, 설명은 타일 안 왼쪽 위', (a) => grid(fs, 3, { area: a, cap: 'inside', gap: 2 })),
+        S('f13c', '하나 크게 + 여덟', '첫 사례를 크게, 나머지 여덟은 아래 4×2', (a) => feature(fs, { area: a, side: 'below', split: 0.5, cols: 4 })),
+        S('f13d', '한 줄 셋 × 셋', '3×3을 넓은 간격으로, 설명은 타일 안 왼쪽 위', (a) => grid(fs, 3, { area: a, cap: 'inside', gap: 40 })),
       ]
     case 14:
     case 15:
       return [
-        S(`f${n}a`, '설명 왼쪽 · 견본 오른쪽', "'국문 제목 | 이사만루체' 같은 설명을 왼쪽 단에, 견본은 그 오른쪽에 원래 크기 그대로", () => list(fs, { capSide: 'left', capW: 260, uniform: true })),
-        S(`f${n}b`, '제목 견본 크게', '제목 견본을 위에 크게, 본문 견본은 아래', () => feature(fs, { side: 'below', split: 0.5 })),
-        S(`f${n}c`, '옅은 판', '견본마다 옅은 판을 깔아 위아래로', () => {
-          // 견본마다 옅은 판 — 판 높이는 견본 칸과 같게
-          const a = AREA, gap = 40, h = (a.b - a.y - gap) / 2
-          return [tint(a.x - 32, a.y - 24, a.r - a.x + 64, h + 8), tint(a.x - 32, a.y + h + gap - 16, a.r - a.x + 64, h + 8), ...grid(fs, 1, { cap: 'below', gap })]
+        S(`f${n}a`, '설명 왼쪽 · 견본 오른쪽', "'국문 제목 | 이사만루체' 같은 설명을 왼쪽 단에, 견본은 그 오른쪽에 원래 크기 그대로", (a) => list(fs, { area: a, capSide: 'left', capW: 260, uniform: true })),
+        S(`f${n}b`, '제목 견본 크게', '제목 견본을 위에 크게, 본문 견본은 아래', (a) => feature(fs, { area: a, side: 'below', split: 0.5 })),
+        S(`f${n}c`, '옅은 판', '견본마다 옅은 판을 깔아 위아래로', (a) => {
+          const p = { x: a.x + 32, y: a.y + 24, r: a.r - 32, b: a.b - 24 }, gap = 56, h = (a.b - a.y - gap) / 2
+          return [tint(a.x, a.y, a.r - a.x, h), tint(a.x, a.y + h + gap, a.r - a.x, h), ...grid(fs, 1, { area: p, cap: 'below', gap: gap + 48 })]
         }),
-        S(`f${n}d`, '견본 왼쪽 · 글 오른쪽', '견본 둘을 왼쪽 8단으로, 제목·설명은 오른쪽 아래', () => grid(fs, 1, { cap: 'below', gap: 40, area: LEFT }), 'right'),
+        S(`f${n}d`, '견본 위아래 · 설명 아래', '견본 둘을 위아래로, 설명은 견본 아래', (a) => grid(fs, 1, { area: a, cap: 'below', gap: 40 })),
       ]
     case 16:
       return [
-        S('f16a', '하나 크게 + 셋', '첫 모티브를 크게, 나머지 셋은 오른쪽에 세로로', () => feature(fs, { split: 0.68 })),
-        S('f16b', '한 줄 넷', '네 모티브를 한 줄로', () => grid(fs, 4, { gap: 16, mode: 'cover', area: { ...AREA, y: 400, b: 720 } })),
-        S('f16c', '재단 2×2', '오른쪽 2/3를 재단선까지 2×2로 채움 (틈 없이)', () => grid(fs, 2, { gap: 0, mode: 'cover', area: { x: AREA.x, y: 0, r: 1920, b: 1080 } }), 'top', 'left'),
-        S('f16d', '한 장 크게 (잘라 씀)', '첫 모티브를 오른쪽 2/3 전면에 크게 잘라 깔고, 나머지는 쓰지 않음', () => grid(fs.slice(0, 1), 1, { gap: 0, mode: 'cover', area: { x: AREA.x, y: 0, r: 1920, b: 1080 } }), 'top', 'left'),
+        S('f16a', '하나 크게 + 셋', '첫 모티브를 크게, 나머지 셋은 오른쪽에 세로로', (a) => feature(fs, { area: a, split: 0.68 })),
+        S('f16b', '한 줄 넷', '네 모티브를 한 줄로', (a) => grid(fs, 4, { gap: 16, mode: 'cover', area: strip(a, 4, 16) })),
+        S('f16c', '2×2 (틈 없이)', '개체 자리를 2×2로 틈 없이 채움', (a) => grid(fs, 2, { gap: 0, mode: 'cover', area: a })),
+        S('f16d', '한 장 크게 (잘라 씀)', '첫 모티브를 개체 자리 전면에 잘라 깔고, 나머지는 쓰지 않음', (a) => grid(fs.slice(0, 1), 1, { gap: 0, mode: 'cover', area: a })),
       ]
   }
   return []

@@ -2,6 +2,7 @@ import type { Doc, El } from './doc'
 import { logoSrc, type Block, type Content, type Item, type LogoAsset, type PageDecl } from './blocks'
 import { isHeadText, pageObject } from './object'
 import type { MockKind } from './mockup'
+import type { Area } from './specials'
 
 /** 원본 내지 쪽 — 쪽마다 개체(로고 자산)가 다르다 */
 export const CONTENT_PAGES: { page: number; asset: LogoAsset | null }[] = [
@@ -103,4 +104,27 @@ export function contentDecls(c: Content, doc: Doc, asset: LogoAsset | null, page
   ]
 
   return { base, variants }
+}
+
+/**
+ * 내지 틀 1–4 = 원본(기준)·02·03·05. 산출물에서는 넷 중 하나를 골라 모든 내지를 같은 틀로 잇는다.
+ * 틀(제목·설명·폴리오 자리, 회색 면)은 고정이고, 쪽마다 바꾸는 것은 개체 자리 안의 표현뿐이다.
+ * 개체 자리 — 1: 원본 1/3 선 오른쪽(원본 개체 자리) · 2: 회색 면 오른쪽 흰 면 · 3: 왼쪽 7.6단 · 4: 위쪽 12단(제목 줄 위까지)
+ */
+export const FORMAT_SLOTS: Area[] = [
+  { x: 673.3, y: 191, r: 1820, b: 927 },
+  { x: 716, y: 191, r: 1820, b: 927 },
+  { x: 100, y: 191, r: 100 + (1720 / 12) * 7.6, b: 927 },
+  { x: 100, y: 150, r: 1820, b: 830 },
+]
+export const FORMAT_NAMES = ['1 원본', '2 왼쪽 회색 면', '3 개체 왼쪽 · 글 오른쪽', '4 개체 위 · 글 아래']
+
+/** 틀 k의 선언에서 개체 블록을 비운다 — 개체 자리는 쪽 전용 표현(specials·figures)이 그린다 */
+export function formatDecl(c: Content, doc: Doc, page: number, k: number, sp: { id: string; name: string; note: string }): PageDecl {
+  const { base, variants } = contentDecls(c, doc, null, page)
+  const d = [base, ...variants][k]
+  return {
+    ...d, id: `${sp.id}-${k + 1}`, name: sp.name, note: `틀 ${FORMAT_NAMES[k]} · ${sp.note}`,
+    blocks: d.blocks.map((b) => (b.items.some((it) => it.k === 'object') ? { ...b, items: [{ k: 'space', h: 0 }] } : b)),
+  }
 }

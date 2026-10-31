@@ -9,7 +9,7 @@ import { renderSpecial, specialLayouts } from '../core/specials'
 import { BASE, COVERS, coverContent } from '../core/cover'
 import { tocContent, tocDecls, tocText } from '../core/toc'
 import { DIVIDER_BASE, dividerDecls, dividerDevelop } from '../core/divider'
-import { CONTENT_PAGES, contentDecls, contentPageText } from '../core/content'
+import { CONTENT_PAGES, FORMAT_NAMES, contentDecls, contentPageText } from '../core/content'
 import { APP_ITEMS, appContent, appDecl } from '../core/application'
 
 const DOC = raw as unknown as Doc
@@ -75,6 +75,7 @@ const isDeck = route === '#deck'
 export default function App() {
   const [, setReady] = useState(0)
   const [tab, setTab] = useState<Tab>(readHash)
+  const [fmt, setFmt] = useState(0)
   useEffect(() => {
     const sample = Object.values(CONTENT).flat().join('')
     const all = sample + sample.toUpperCase()
@@ -146,37 +147,30 @@ export default function App() {
             />
           )
         })}
-        {tab === 'content' && PAGE_CONTENT.map((p) => {
-          const decls = contentDecls(p.content, DOC, p.asset, p.page)
-          // 색상 체계·색상 규정·회색도는 쪽 전용 레이아웃 4개 (specials.ts)
-          const special = specialLayouts(DOC, p.page)
-          if (special.length) {
-            return (
-              <Section
-                key={p.page}
-                title={`내지 · ${p.content.pkr[0]} (원본 ${p.page}쪽) — 전용 레이아웃`}
-                sub="원본에서 구성 요소(색·값·바탕×버전·농도 단계·로고)를 읽어 이 쪽만의 배치로 다시 짬 · 값과 이름은 원본 글 그대로"
-                content={p.content}
-                decls={[
-                  { d: decls.base, label: '기준' },
-                  ...special.map((sp, i) => {
-                    const r = renderSpecial(sp, p.content, DOC, FONT_SETS[0], 100 + p.page * 10 + i)
-                    return { d: r.decl, label: String(i + 1).padStart(2, '0'), page: r.page }
-                  }),
-                ]}
-              />
-            )
-          }
-          return (
-            <Section
-              key={p.page}
-              title={`내지 변주 · ${p.content.pkr[0]} (원본 ${p.page}쪽)`}
-              sub="원본 심볼 장을 기본형으로 · 제목·설명·개체·하단 캡션 위치와 개체 뒤 상자만 바꿈 · 같은 선언을 쪽마다 그림 · 개체는 단 수·높이 상자 안에 맞춤"
-              content={p.content}
-              decls={[{ d: decls.base, label: '기준' }, ...decls.variants.map((d) => ({ d, label: d.id.slice(1) }))]}
-            />
-          )
-        })}
+        {tab === 'content' && (
+          <nav className="gle-formats" aria-label="내지 틀">
+            {FORMAT_NAMES.map((n, k) => (
+              <button key={k} type="button" aria-pressed={fmt === k} onClick={() => setFmt(k)}>{n}</button>
+            ))}
+          </nav>
+        )}
+        {tab === 'content' && (
+          <Section
+            title={`내지 틀 ${FORMAT_NAMES[fmt]} — 원본 4–16쪽을 한 틀로 이어 보기`}
+            sub="틀(제목·설명·폴리오 자리, 회색 면)은 넷 중 하나로 고정 · 쪽마다 개체 자리 안의 표현(색 면·행렬·단계·그림 배치)만 다름 · 산출물은 틀 하나를 골라 모든 내지를 같은 틀로"
+            decls={PAGE_CONTENT.map((p) => {
+              const special = specialLayouts(DOC, p.page)
+              const label = `${p.page}쪽`
+              if (!special.length) {
+                const d = contentDecls(p.content, DOC, p.asset, p.page)
+                const decl = [d.base, ...d.variants][fmt]
+                return { d: { ...decl, id: `${decl.id}-${p.page}`, name: p.content.pkr[0], note: `틀 ${FORMAT_NAMES[fmt]}` }, label, page: renderPage(decl, p.content, DOC, FONT_SETS[0], p.page) }
+              }
+              const r = renderSpecial(special[fmt], fmt, p.content, DOC, FONT_SETS[0], p.page)
+              return { d: { ...r.decl, name: `${p.content.pkr[0]} · ${r.decl.name}` }, label, page: r.page }
+            })}
+          />
+        )}
         {tab === 'divider' && (
           <Section
             title="간지 디벨롭 · 04 08 09 10"
