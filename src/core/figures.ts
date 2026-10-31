@@ -165,17 +165,22 @@ function row(fs: Figure[], o: { gap?: number; tile?: boolean; maxScale?: number;
 }
 
 /** 격자 — cols 단, 설명은 칸 아래(below) 또는 칸 안 왼쪽 위(inside) */
-function grid(fs: Figure[], cols: number, o: { gap?: number; cap?: 'below' | 'inside'; mode?: 'contain' | 'cover'; area: Area }): El[] {
+function grid(fs: Figure[], cols: number, o: { gap?: number; cap?: 'below' | 'inside'; mode?: 'contain' | 'cover'; area: Area; align?: 'center' | 'left'; uniform?: boolean }): El[] {
   const a = o.area, gap = o.gap ?? 24
   const rows = Math.ceil(fs.length / cols)
   const ch = o.cap === 'below' ? Math.max(...fs.map(capH)) : 0
   const w = (a.r - a.x - gap * (cols - 1)) / cols
   const h = (a.b - a.y - gap * (rows - 1)) / rows - ch
   const out: El[] = []
+  const at = (i: number) => ({ x: a.x + (i % cols) * (w + gap), y: a.y + Math.floor(i / cols) * (h + ch + gap), w, h })
+  // 같은 배율 — 견본끼리 안쪽 정렬(굵기 이름 줄 등)이 원본대로 맞는다
+  const k = o.uniform ? common(fs, fs.map((_, i) => at(i)), 3) : undefined
   fs.forEach((f, i) => {
-    const x = a.x + (i % cols) * (w + gap), y = a.y + Math.floor(i / cols) * (h + ch + gap)
-    out.push(put(f, { x, y, w, h }, o.mode ?? 'contain', 3).el)
-    if (o.cap === 'below') out.push(...caption(f, x, y + h + 26))
+    const { x, y } = at(i)
+    const p = put(f, at(i), o.mode ?? 'contain', 3, o.align, k)
+    out.push(p.el)
+    // 설명은 그림 바로 아래 (틀이 그림보다 클 때 떨어지지 않게)
+    if (o.cap === 'below') out.push(...caption(f, x, (o.uniform ? p.box[1] + p.box[3] : y + h) + 26))
     if (o.cap === 'inside') out.push(...caption(f, x + 16, y + 30))
   })
   return out
@@ -201,18 +206,18 @@ function list(fs: Figure[], o: { capW?: number; area: Area; capSide?: 'left' | '
 }
 
 /** 하나 크게 + 나머지 작게 (오른쪽 또는 아래로) */
-function feature(fs: Figure[], o: { side?: 'right' | 'below'; split?: number; cols?: number; area: Area }): El[] {
+function feature(fs: Figure[], o: { side?: 'right' | 'below'; split?: number; cols?: number; area: Area; align?: 'center' | 'left' }): El[] {
   const a = o.area, gap = 24
   const [main, ...rest] = fs
   const out: El[] = []
   if ((o.side ?? 'right') === 'right') {
     const mw = (a.r - a.x - gap) * (o.split ?? 0.62)
-    out.push(put(main, { x: a.x, y: a.y, w: mw, h: a.b - a.y - capH(main) }, 'contain', 3).el, ...caption(main, a.x, a.b - capH(main) + 30))
-    out.push(...grid(rest, o.cols ?? 1, { area: { x: a.x + mw + gap, y: a.y, r: a.r, b: a.b }, cap: 'below', gap: 20 }))
+    out.push(put(main, { x: a.x, y: a.y, w: mw, h: a.b - a.y - capH(main) }, 'contain', 3, o.align).el, ...caption(main, a.x, a.b - capH(main) + 30))
+    out.push(...grid(rest, o.cols ?? 1, { area: { x: a.x + mw + gap, y: a.y, r: a.r, b: a.b }, cap: 'below', gap: 20, align: o.align }))
   } else {
     const mh = (a.b - a.y - gap) * (o.split ?? 0.6)
-    out.push(put(main, { x: a.x, y: a.y, w: a.r - a.x, h: mh - capH(main) }, 'contain', 3).el, ...caption(main, a.x, a.y + mh - capH(main) + 30))
-    out.push(...grid(rest, o.cols ?? rest.length, { area: { x: a.x, y: a.y + mh + gap, r: a.r, b: a.b }, cap: 'below', gap: 20 }))
+    out.push(put(main, { x: a.x, y: a.y, w: a.r - a.x, h: mh - capH(main) }, 'contain', 3, o.align).el, ...caption(main, a.x, a.y + mh - capH(main) + 30))
+    out.push(...grid(rest, o.cols ?? rest.length, { area: { x: a.x, y: a.y + mh + gap, r: a.r, b: a.b }, cap: 'below', gap: 20, align: o.align }))
   }
   return out
 }
@@ -249,26 +254,24 @@ export function figureLayouts(doc: Doc, n: number): Special[] {
         // 두 크기의 관계(20mm·10mm)가 내용이므로 모든 표현에서 같은 배율
         S('f9a', '나란히 + 아래 설명', '두 크기를 한 줄로 나란히 놓고 치수 설명을 각 그림 아래로. 두 그림은 같은 배율', (a) => row(fs, { area: a, maxScale: 1.4, uniform: true })),
         S('f9b', '설명 왼쪽 목록', '원본의 목록을 뒤집어 설명을 왼쪽 단에, 그림은 그 오른쪽에 왼쪽 맞춤', (a) => list(fs, { area: a, capSide: 'left', capW: 340, uniform: true })),
-        S('f9c', '옅은 판', '크기마다 옅은 판 위에 그림, 설명은 판 아래. 같은 배율', (a) => row(fs, { area: a, tile: true, gap: 24, maxScale: 1.4, uniform: true })),
+        S('f9c', '나란히 (판 없이)', '두 크기를 판 없이 한 줄로, 설명은 그림 아래. 같은 배율', (a) => row(fs, { area: a, gap: 48, maxScale: 1.4, uniform: true })),
         S('f9d', '설명 오른쪽 목록', '원본처럼 그림 위아래 목록, 설명은 오른쪽 단', (a) => list(fs, { area: a, capW: 300, uniform: true })),
       ]
     case 13:
       return [
         S('f13a', '설명 아래 3×3', '원본 3×3에서 설명을 타일 아래로 내림', (a) => grid(fs, 3, { area: a, cap: 'below', gap: 24 })),
         S('f13b', '틈 없는 격자', '타일 사이 틈을 없애 한 장의 판처럼, 설명은 타일 안 왼쪽 위', (a) => grid(fs, 3, { area: a, cap: 'inside', gap: 2 })),
-        S('f13c', '하나 크게 + 여덟', '첫 사례를 크게, 나머지 여덟은 아래 4×2', (a) => feature(fs, { area: a, side: 'below', split: 0.5, cols: 4 })),
+        // 옅은 타일 바탕을 뺀다 (타일은 그림 묶음의 첫 요소, 자리는 그대로)
+        S('f13c', '3×3 (바탕 없이)', '원본 3×3에서 타일 바탕을 빼고, 설명은 사례 아래', (a) => grid(fs.map((f) => ({ ...f, els: f.els.slice(1) })), 3, { area: a, cap: 'below', gap: 20 })),
         S('f13d', '한 줄 셋 × 셋', '3×3을 넓은 간격으로, 설명은 타일 안 왼쪽 위', (a) => grid(fs, 3, { area: a, cap: 'inside', gap: 40 })),
       ]
     case 14:
     case 15:
       return [
         S(`f${n}a`, '설명 왼쪽 · 견본 오른쪽', "'국문 제목 | 이사만루체' 같은 설명을 왼쪽 단에, 견본은 그 오른쪽에 원래 크기 그대로", (a) => list(fs, { area: a, capSide: 'left', capW: 260, uniform: true })),
-        S(`f${n}b`, '제목 견본 크게', '제목 견본을 위에 크게, 본문 견본은 아래', (a) => feature(fs, { area: a, side: 'below', split: 0.5 })),
-        S(`f${n}c`, '옅은 판', '견본마다 옅은 판을 깔아 위아래로', (a) => {
-          const p = { x: a.x + 32, y: a.y + 24, r: a.r - 32, b: a.b - 24 }, gap = 56, h = (a.b - a.y - gap) / 2
-          return [tint(a.x, a.y, a.r - a.x, h), tint(a.x, a.y + h + gap, a.r - a.x, h), ...grid(fs, 1, { area: p, cap: 'below', gap: gap + 48 })]
-        }),
-        S(`f${n}d`, '견본 위아래 · 설명 아래', '견본 둘을 위아래로, 설명은 견본 아래', (a) => grid(fs, 1, { area: a, cap: 'below', gap: 40 })),
+        S(`f${n}b`, '견본 위아래 (같은 배율)', '견본 둘을 같은 배율로 위아래에, 설명은 견본 아래. 왼쪽 맞춤', (a) => grid(fs, 1, { area: a, cap: 'below', gap: 56, align: 'left', uniform: true })),
+        S(`f${n}c`, '견본 위아래', '견본 둘을 판 없이 위아래로, 설명은 견본 아래. 왼쪽 맞춤', (a) => grid(fs, 1, { area: a, cap: 'below', gap: 56, align: 'left', uniform: true })),
+        S(`f${n}d`, '설명 왼쪽 · 견본 오른쪽', '설명을 왼쪽 단에, 견본은 같은 배율로 왼쪽 맞춤', (a) => list(fs, { area: a, capSide: 'left', capW: 260, uniform: true })),
       ]
     case 16:
       return [
